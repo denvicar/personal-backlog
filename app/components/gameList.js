@@ -1,7 +1,7 @@
 'use client'
 
 import {useState} from "react";
-import {searchGame, addGame} from "@/app/api/gameServer";
+import {searchGame, addGame, updateGame} from "@/app/api/gameServer";
 import GameDetail from "@/app/components/gameDetail";
 import GameSearch from "@/app/components/gameSearch";
 
@@ -35,7 +35,7 @@ export default function GameList({games}) {
             date_started: game.start_date,
             date_finished: game.finish_date,
             status: game.status,
-            rating: correctResult.aggregated_rating,
+            rating: correctResult.aggregated_rating ? correctResult.aggregated_rating/10 : 0,
             score: game.score,
             comments: game.comments
         }
@@ -47,6 +47,11 @@ export default function GameList({games}) {
         const pickedGame = displayedGames.find(g => g.id===id)
         setGameDetail(pickedGame)
         setDetailShow(true)
+    }
+
+    const handleEdit = async (game) => {
+        const updated = await updateGame(game)
+        setDisplayedGames(displayedGames.map(g=>g.id===game.id ? updated : g))
     }
 
     return (<>
@@ -67,7 +72,7 @@ export default function GameList({games}) {
             </div>
             <GameSearch search={search} handleAdd={addNewGame} searchResult={searchResult} />
         </div>
-            <GameDetail game={gameDetail} visible={detailShow} handleClose={() => setDetailShow(false)} />
+            <GameDetail game={gameDetail} setGame={setGameDetail} visible={detailShow} handleEdit={handleEdit} handleClose={() => setDetailShow(false)} />
         </>
     )
 }

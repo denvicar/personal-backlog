@@ -33,17 +33,17 @@ export default function GameDetail({game, setGame, handleClose, handleEdit, visi
                     <div className={"text-black"}>
                         <label>
                             <span className={"font-bold dark:text-white mr-2"}>Started on:</span>
-                            <input type={"date"} value={game.date_started} onChange={(e)=>setGame({...game,start_date:e.target.value})} />
+                            <input type={"date"} value={game.date_started} onChange={(e)=>setGame({...game,date_started:e.target.value})} />
                         </label>
                     </div>
                     <div hidden={game.status!==status.COMPLETED} className={"text-black"}>
                         <label>
                             <span className={"font-bold dark:text-white mr-2"}>Finished on:</span>
-                            <input type={"date"} value={game.date_finished} onChange={(e)=>setGame({...game,finish_date:e.target.value})} />
+                            <input type={"date"} value={game.date_finished} onChange={(e)=>setGame({...game,date_finished:e.target.value})} />
                         </label>
                     </div>
                     <div><span className={"font-bold"}>Summary:</span> {game.summary}</div>
-                    <div>
+                    <div className={"text-black"}>
                         <label>
                             <span className={"font-bold dark:text-white mr-2"}>Notes:</span>
                             <textarea placeholder={"Comments..."} value={game.comments} onChange={(e)=>setGame({...game,comments:e.target.value})} />
@@ -53,7 +53,10 @@ export default function GameDetail({game, setGame, handleClose, handleEdit, visi
             </div>
             <div className={"w-full flex flex-row justify-between"}>
                 <button className={"border-2 rounded dark:border-white border-black px-2 py-1"} onClick={() => setEdit(false)}>Cancel</button>
-                <button className={"border-2 rounded dark:border-white border-black px-2 py-1"} onClick={handleEdit}>Confirm</button>
+                <button className={"border-2 rounded dark:border-white border-black px-2 py-1"} onClick={()=>{
+                    setEdit(false)
+                    handleEdit(game)
+                }}>Confirm</button>
             </div>
         </div>
     )
