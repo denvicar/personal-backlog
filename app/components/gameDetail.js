@@ -33,13 +33,13 @@ export default function GameDetail({game, setGame, handleClose, handleEdit, visi
                     <div className={"text-black"}>
                         <label>
                             <span className={"font-bold dark:text-white mr-2"}>Started on:</span>
-                            <input type={"date"} value={game.date_started} onChange={(e)=>setGame({...game,date_started:e.target.value})} />
+                            <input type={"date"} value={game.start_date} onChange={(e)=>setGame({...game,start_date:e.target.value})} />
                         </label>
                     </div>
                     <div hidden={game.status!==status.COMPLETED} className={"text-black"}>
                         <label>
                             <span className={"font-bold dark:text-white mr-2"}>Finished on:</span>
-                            <input type={"date"} value={game.date_finished} onChange={(e)=>setGame({...game,date_finished:e.target.value})} />
+                            <input type={"date"} value={game.finish_date} onChange={(e)=>setGame({...game,finish_date:e.target.value})} />
                         </label>
                     </div>
                     <div><span className={"font-bold"}>Summary:</span> {game.summary}</div>
@@ -66,14 +66,14 @@ export default function GameDetail({game, setGame, handleClose, handleEdit, visi
             <div className={"flex h-[90%] flex-row gap-2 overflow-y-scroll"}>
                 <div className={"w-fit flex-shrink-0"}><img src={game.cover_url} /> </div>
                 <div className={"flex flex-col w-fit overflow-y-scroll"}>
-                    <div><span className={"font-bold"}>Title:</span> {game.title}</div>
+                    <div><span className={"font-bold"}>Title:</span> {game.title} {game.id}</div>
                     <div><span className={"font-bold"}>Genres:</span> {game.genres.join(", ").trim()}</div>
                     <div><span className={"font-bold"}>Platforms:</span> {game.platforms.join(", ").trim()}</div>
                     <div><span className={"font-bold"}>Status:</span> {status.statusLabels[game.status]}</div>
                     <div hidden={game.status!==status.COMPLETED}><span className={"font-bold"}>Score:</span> {game.score}</div>
                     <div><span className={"font-bold"}>Rating:</span> {rating}</div>
-                    <div><span className={"font-bold"}>Started on:</span> {game.date_started}</div>
-                    <div hidden={game.status!==status.COMPLETED}><span className={"font-bold"}>Finished on:</span> {game.date_finished}</div>
+                    <div><span className={"font-bold"}>Started on:</span> {game.start_date}</div>
+                    <div hidden={game.status!==status.COMPLETED}><span className={"font-bold"}>Finished on:</span> {game.finish_date}</div>
                     <div><span className={"font-bold"}>Summary:</span> {game.summary}</div>
                     <div><span className={"font-bold"}>Notes:</span> {game.comments}</div>
                 </div>

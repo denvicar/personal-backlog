@@ -6,6 +6,7 @@ import GameDetail from "@/app/components/gameDetail";
 import GameSearch from "@/app/components/gameSearch";
 import Fuse from 'fuse.js'
 import Alert from "@/app/components/alert";
+import {getDateFromIGDB, getDateStringFromDB} from "@/app/utils/utils";
 
 export default function GameList({games}) {
     let [displayedGames, setDisplayedGames] = useState(games.filter(g => g.user==='Ciro' && g.genres))
@@ -26,7 +27,7 @@ export default function GameList({games}) {
 
 
     const getYear = (ts) => {
-        const d = new Date(ts*1000)
+        const d = new Date(ts)
         return d.getFullYear();
     }
 
@@ -45,16 +46,16 @@ export default function GameList({games}) {
             summary: correctResult.summary,
             genres: correctResult.genres.map(g => g.name),
             platforms: correctResult.platforms.map(p => p.name),
-            release_date: correctResult.first_release_date,
-            date_started: game.start_date,
-            date_finished: game.finish_date,
+            release_date: correctResult.first_release_date ? getDateFromIGDB(correctResult.first_release_date) : correctResult.first_release_date,
+            start_date: game.start_date !== '' ? game.start_date : null,
+            finish_date: game.finish_date !== '' ? game.finish_date : null,
             status: game.status,
-            rating: correctResult.aggregated_rating ? correctResult.aggregated_rating/10 : 0,
+            rating: correctResult.aggregated_rating ? Math.round(correctResult.aggregated_rating*100) : 0,
             score: game.score,
             comments: game.comments
         }
-        const addedGame = await addGame(newGame)
-        setDisplayedGames([...displayedGames,addedGame])
+        const res = await addGame(newGame)
+        setDisplayedGames(res)
     }
 
     const handleRowClick = (id) => {
@@ -65,7 +66,7 @@ export default function GameList({games}) {
 
     const handleEdit = async (game) => {
         const updated = await updateGame(game)
-        setDisplayedGames(displayedGames.map(g=>g.id===game.id ? updated : g))
+        setDisplayedGames(updated)
     }
 
     const handleDelete = async () => {

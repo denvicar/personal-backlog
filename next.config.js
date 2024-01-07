@@ -8,8 +8,7 @@ const nextConfig = {
                 port: "",
             }
         ]
-    },
-    basePath:"/personal-backlog"
+    }
 }
 
 module.exports = nextConfig
