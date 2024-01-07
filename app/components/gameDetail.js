@@ -2,7 +2,7 @@
 import {status} from "@/app/utils/constants";
 import {useState} from "react";
 
-export default function GameDetail({game, setGame, handleClose, handleEdit, visible}) {
+export default function GameDetail({game, setGame, handleClose, handleEdit, visible, handleDelete}) {
     let [edit, setEdit] = useState(false)
     let rating = game.rating ? game.rating : 0
     rating = Math.round(rating*100)/100
@@ -78,7 +78,10 @@ export default function GameDetail({game, setGame, handleClose, handleEdit, visi
                     <div><span className={"font-bold"}>Notes:</span> {game.comments}</div>
                 </div>
             </div>
-            <button className={"border-2 rounded dark:border-white border-black px-2 py-1"} onClick={() => setEdit(true)}>Edit</button>
+            <div className={"w-full flex flex-row justify-between"}>
+                <button className={"border-2 rounded dark:border-white border-black px-2 py-1"} onClick={() => handleDelete()}>Delete game</button>
+                <button className={"border-2 rounded dark:border-white border-black px-2 py-1"} onClick={() => setEdit(true)}>Edit</button>
+            </div>
         </div>
     )
 }
