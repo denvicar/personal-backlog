@@ -9,7 +9,6 @@ const nextConfig = {
             }
         ]
     },
-    output: "export",
     basePath:"/personal-backlog"
 }
 
