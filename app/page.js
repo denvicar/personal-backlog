@@ -9,9 +9,9 @@ import {unstable_noStore} from "next/cache";
 
 export default async function Home() {
   const games = await getGames()
-  const {user} = await auth()
+  const session = await auth()
 
-  if (!user) {
+  if (!session || !session.user) {
     redirect('/api/auth/signin')
   }
 
