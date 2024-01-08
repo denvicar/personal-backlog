@@ -17,6 +17,6 @@ export default async function Home() {
 
   return (
     // <GameList games={json} />
-      <GameList games={games.filter(g=>g.user===user.name)} />
+      <GameList games={games.filter(g=>g.user===session.user.name)} />
   )
 }
