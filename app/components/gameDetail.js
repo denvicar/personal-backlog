@@ -66,7 +66,7 @@ export default function GameDetail({game, setGame, handleClose, handleEdit, visi
             <div className={"flex h-[90%] flex-row gap-2 overflow-y-scroll"}>
                 <div className={"w-fit flex-shrink-0"}><img src={game.cover_url} /> </div>
                 <div className={"flex flex-col w-fit overflow-y-scroll"}>
-                    <div><span className={"font-bold"}>Title:</span> {game.title} {game.id}</div>
+                    <div><span className={"font-bold"}>Title:</span> {game.title}</div>
                     <div><span className={"font-bold"}>Genres:</span> {game.genres.join(", ").trim()}</div>
                     <div><span className={"font-bold"}>Platforms:</span> {game.platforms.join(", ").trim()}</div>
                     <div><span className={"font-bold"}>Status:</span> {status.statusLabels[game.status]}</div>

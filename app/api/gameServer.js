@@ -4,6 +4,8 @@ import {sql} from "@vercel/postgres";
 import {NextResponse} from "next/server";
 import {convertArrayForDB} from "@/app/utils/utils";
 import {revalidatePath} from "next/cache";
+import {redirect} from "next/navigation";
+import {unstable_noStore} from "next/cache";
 
 const base_url = 'https://api.igdb.com/v4'
 const headers = {
@@ -61,6 +63,7 @@ const formatDbData = (json) => {
     })
 }
 export async function searchGame(game) {
+    console.log('querying')
     const res = await fetch(`${base_url}/games`, {
         method: 'POST',
         headers: headers,
@@ -71,27 +74,38 @@ export async function searchGame(game) {
 
 export async function getGames() {
     const {rows} = await sql`select * from "Games" order by id asc`
-    revalidatePath('/')
     return formatDbData(rows)
 }
 
 export async function addGame(game) {
-    let res = await sql`INSERT INTO "Games"(title, igdb_id, cover_url, score, rating, summary, comments, genres, platforms, release_date, start_date, finish_date, status)
+    try {
+        await sql`INSERT INTO "Games"(title, igdb_id, cover_url, score, rating, summary, comments, genres, platforms, release_date, start_date, finish_date, status)
                 VALUES (${game.title}, ${game.igdb_id}, ${game.cover_url}, ${game.score}, ${game.rating}, ${game.summary}, ${game.comments}, ${game.genres}, ${game.platforms}, ${game.release_date}, ${game.start_date}, ${game.finish_date}, ${game.status});`
-    console.log(res)
-    return getGames()
+        const res = await sql`select * from "Games" where igdb_id=${game.igdb_id}`
+        return formatDbData(res.rows)[0]
+    } catch (error) {
+        return {status:500,message:'Database error'}
+    }
 }
 
 export async function updateGame(game) {
-    const res = await sql`UPDATE "Games"
+    try {
+        await sql`UPDATE "Games"
                 SET score=${game.score}, comments=${game.comments}, start_date=${game.start_date}, finish_date=${game.finish_date}, status=${game.status}
                 WHERE id=${game.id};`
-    console.log(res)
-    return getGames()
+        return {status:200,message:'Updated game'}
+    } catch (error) {
+        return {status:500,message:'Database error'}
+    }
+
 }
 
 export async function deleteGame(id) {
-    const res = await sql`Delete from "Games" where id=${id}`
-    console.log(res)
-    return getGames()
+    try {
+        await sql`Delete from "Games" where id=${id}`
+        return {status:200,message:'Deleted game'}
+    } catch (error) {
+        return {status:500,message:'Database error'}
+    }
+
 }

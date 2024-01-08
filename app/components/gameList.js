@@ -8,8 +8,9 @@ import Fuse from 'fuse.js'
 import Alert from "@/app/components/alert";
 import {getDateFromIGDB, getDateStringFromDB} from "@/app/utils/utils";
 
+
 export default function GameList({games}) {
-    let [displayedGames, setDisplayedGames] = useState(games.filter(g => g.user==='Ciro' && g.genres))
+    let [displayedGames, setDisplayedGames] = useState(games)
     let [searchResult, setSearchResult] = useState([])
     let [gameDetail, setGameDetail] = useState({})
     let [detailShow, setDetailShow] = useState(false)
@@ -55,7 +56,7 @@ export default function GameList({games}) {
             comments: game.comments
         }
         const res = await addGame(newGame)
-        setDisplayedGames(res)
+        setDisplayedGames([...displayedGames,res])
     }
 
     const handleRowClick = (id) => {
@@ -65,15 +66,15 @@ export default function GameList({games}) {
     }
 
     const handleEdit = async (game) => {
-        const updated = await updateGame(game)
-        setDisplayedGames(updated)
+        await updateGame(game)
+        setDisplayedGames(displayedGames.map(g => g.id===game.id ? game : g))
     }
 
     const handleDelete = async () => {
-        const db = await deleteGame(gameDetail.id)
+        await deleteGame(gameDetail.id)
         setDetailShow(false)
         setAlertShow(false)
-        setDisplayedGames(db)
+        setDisplayedGames(displayedGames.filter(g => g.id!==gameDetail.id))
     }
 
     return (<>

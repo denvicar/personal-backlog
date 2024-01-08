@@ -34,7 +34,7 @@ export default function GameSearch({searchResult,handleAdd,search, filter, setFi
             <input className={"py-1"} type={"date"} placeholder={"Finished on..."} value={game.finish_date} onChange={(e)=>setGame({...game,finish_date:e.target.value})} />
             <input type={"number"} hidden={game.status!=='COMP'} placeholder={"Score"} value={game.score ? game.score : ''} onChange={(e)=>setGame({...game,score:e.target.value})} />
             <textarea hidden={game.status!=='COMP' && game.status!=='DROP'} placeholder={"Comments"} value={game.comments} onChange={(e)=>setGame({...game,comments:e.target.value})} />
-            <input type={"submit"} value={"Search game"} className={"rounded dark:border-white border-2 border-black mb-5 dark:text-white"} onClick={()=>search(game.title)}/>
+            <button className={"rounded dark:border-white border-2 border-black mb-5 dark:text-white"} onClick={()=>search(game.title)}>Search game</button>
             <div className={"flex flex-col gap-1 h-full overflow-y-scroll dark:text-white pr-2"}>
                 {searchResult.map(s => <div key={s.id} className={"flex flex-row gap-1 w-full items-center"}>
                     {s.cover && <img className={"w-[50%]"} src={`http:${s.cover.url.replace('t_thumb','t_cover_big')}`} />}
