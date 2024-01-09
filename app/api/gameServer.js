@@ -1,6 +1,6 @@
 'use server'
 import {promises as fs} from 'fs'
-import {sql, db} from "@vercel/postgres";
+import {sql} from "@vercel/postgres";
 import {NextResponse} from "next/server";
 import {convertArrayForDB} from "@/app/utils/utils";
 import {revalidatePath} from "next/cache";
@@ -13,7 +13,6 @@ const headers = {
     'Authorization': `Bearer ${process.env.IGDB_TOKEN}`
 }
 const requested_fields = 'fields id,aggregated_rating,cover.url,first_release_date,genres.name,name,platforms.name,summary'
-const client = await db.connect()
 const formatDbData = (json) => {
     return json.map(item => {
         let mapped = {}
@@ -73,7 +72,7 @@ export async function searchGame(game) {
 
 export async function getGames() {
     unstable_noStore()
-    const {rows} = await client.sql`select * from "Games" order by id asc`
+    const {rows} = await sql`select * from "Games" order by id asc`
     return formatDbData(rows)
 }
 

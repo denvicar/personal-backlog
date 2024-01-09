@@ -2,7 +2,7 @@
 
 import {useState} from "react";
 import {searchGame, addGame, updateGame, deleteGame} from "@/app/api/gameServer";
-import GameDetail from "@/app/components/gameDetail";
+import GameDetailEdit from "@/app/components/gameDetailEdit";
 import GameSearch from "@/app/components/gameSearch";
 import Fuse from 'fuse.js'
 import Alert from "@/app/components/alert";
@@ -88,7 +88,7 @@ export default function GameList({games,user}) {
                 <div className={"overflow-y-scroll max-h-svh flex flex-col gap-2 w-full pb-2"}>
                     {data
                         .map(g => <div onClick={() => handleRowClick(g.id)} key={g.id} className={"flex flex-row w-full items-center justify-around  "}>
-                        <div className={"lg:w-[15%] w-1/3"}><img src={g.cover_url} /></div>
+                        <div className={"lg:w-[15%] w-1/3"}><img src={g.cover_url} alt={g.title} /></div>
                         <div className={"lg:w-[33%] w-1/3 align-"}>{g.title} ({getYear(g.release_date)})</div>
                         <div className={"lg:w-[7%] w-1/3 align-middle "}>{status.statusLabels[g.status]}</div>
                     </div>)}
@@ -96,12 +96,12 @@ export default function GameList({games,user}) {
             </div>
             <GameSearch filter={filter} setFilter={setFilter} search={search} handleAdd={addNewGame} searchResult={searchResult} />
         </div>
-            <GameDetail handleDelete={()=>setAlertShow(true)}
-                        game={gameDetail}
-                        setGame={setGameDetail}
-                        visible={detailShow}
-                        handleEdit={handleEdit}
-                        handleClose={() => setDetailShow(false)} />
+            <GameDetailEdit handleDelete={()=>setAlertShow(true)}
+                            game={gameDetail}
+                            setGame={setGameDetail}
+                            visible={detailShow}
+                            handleEdit={handleEdit}
+                            handleClose={() => setDetailShow(false)} />
         {alertShow && <Alert handleConfirm={handleDelete} handleCancel={()=>setAlertShow(false)} gameTitle={gameDetail.title} />}
         </>
     )

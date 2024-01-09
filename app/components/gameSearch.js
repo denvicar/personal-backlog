@@ -1,9 +1,11 @@
 'use client'
 
 import {useState} from "react";
+import GameDetail from "@/app/components/gameDetail";
 
 export default function GameSearch({searchResult,handleAdd,search, filter, setFilter}) {
     let [game, setGame] = useState({title:'',status:'PLAN',start_date:'',finish_date:'',score:null,comments:''})
+    let [igdbDetail, setIgdbDetail] = useState()
 
     const resetInput = () => {
         setGame({title:'',status:'PLAN',start_date:'',finish_date:'',score:null,comments:''})
@@ -21,6 +23,7 @@ export default function GameSearch({searchResult,handleAdd,search, filter, setFi
     }
 
     return (
+        <>
         <div className={"flex flex-col gap-1 w-[35%] text-black h-svh flex-grow-0 pt-5 pb-2"}>
             <input type={"text"} placeholder={"Filter list..."} className={"py-1 bg-gray-600 rounded-xl px-2 mb-2"} value={filter} onChange={(e) => setFilter(e.target.value)} />
             <input type={"text"} placeholder={"Game title"} onKeyDown={(e)=>handleKeyPress(e)} value={game.title} onChange={(e)=>setGame({...game,title:e.target.value})} />
@@ -37,12 +40,15 @@ export default function GameSearch({searchResult,handleAdd,search, filter, setFi
             <button className={"rounded dark:border-white border-2 border-black mb-5 dark:text-white"} onClick={()=>search(game.title)}>Search game</button>
             <div className={"flex flex-col gap-1 h-full overflow-y-scroll dark:text-white pr-2"}>
                 {searchResult.map(s => <div key={s.id} className={"flex flex-row gap-1 w-full items-center"}>
-                    {s.cover && <img className={"w-[50%]"} src={`http:${s.cover.url.replace('t_thumb','t_cover_big')}`} />}
+                    {s.cover && <img className={"w-[50%]"} src={`http:${s.cover.url.replace('t_thumb','t_cover_big')}`} alt={s.name}/>}
                     <div className={"flex flex-col w-[50%] gap-2 items-center"}>
                         <div className={"text-sm"}>{s.name}</div>
+                        <button className={"rounded dark:border-white border-2 border-black w-5/6"} onClick={()=>setIgdbDetail(s)}>Detail</button>
                         <button className={"rounded dark:border-white border-2 border-black w-5/6"} onClick={()=>add(s.id)}>Add</button>
                     </div>
                 </div>)}
             </div>
-    </div>)
+    </div>
+            <GameDetail game={igdbDetail} handleClose={()=>setIgdbDetail(null)} />
+            </>)
 }

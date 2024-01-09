@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import {promises as fs} from 'fs'
 import GameList from "@/app/components/gameList";
-import GameDetail from "@/app/components/gameDetail";
+import GameDetailEdit from "@/app/components/gameDetailEdit";
 import {getGames} from "@/app/api/gameServer";
 import {auth} from "@/auth";
 import {redirect} from "next/navigation";
