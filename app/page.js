@@ -8,16 +8,16 @@ import {redirect} from "next/navigation";
 import {unstable_noStore} from "next/cache";
 
 export default async function Home() {
-  const games = await getGames()
   const session = await auth()
 
   if (!session || !session.user) {
     redirect('/api/auth/signin')
   }
+  const games = await getGames(session.user.name)
 
   return (
     // <GameList games={json} />
-      <GameList games={games.filter(g=>g.user===session.user.name)} user={session.user} />
+      <GameList games={games} user={session.user} />
   )
 }
 

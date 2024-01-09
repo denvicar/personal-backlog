@@ -55,8 +55,8 @@ export default function GameList({games,user}) {
             comments: game.comments,
             user: user.name
         }
-        const res = await addGame(newGame)
-        setDisplayedGames([...displayedGames,res])
+        addGame(newGame)
+            .then(res => setDisplayedGames([...displayedGames,res]))
     }
 
     const handleRowClick = (id) => {
@@ -78,19 +78,23 @@ export default function GameList({games,user}) {
     }
 
     return (<>
-        <div className={"flex flex-row mx-auto lg:w-1/2 w-[75%] items-start gap-3 h-svh "}>
+        <div className={"flex flex-row mx-auto lg:w-[65%] w-[80%] items-start gap-3 h-svh "}>
             <div className={"flex flex-col gap-2 m-auto h-svh flex-shrink-0 w-[70%]"}>
                 <div className={"flex flex-row w-full justify-around border-b-2 border-b-black dark:border-b-white relative top-0 left-0 bg-black"}>
                     <div className={"lg:w-[15%] w-1/3"}><h1 className={"font-bold text-lg"}>Cover</h1></div>
-                    <div className={"lg:w-[33%] w-1/3"}><h1 className={"font-bold text-lg"}>Title</h1></div>
-                    <div className={"lg:w-[7%] w-1/3"}><h1 className={"font-bold text-lg"}>Status</h1></div>
+                    <div className={"lg:w-[40%] w-1/3"}><h1 className={"font-bold text-lg"}>Title</h1></div>
+                    <div className={"lg:w-[15%] w-1/3"}><h1 className={"font-bold text-lg"}>Status</h1></div>
+                    <div className={"lg:w-[15%] lg:block hidden "}><h1 className={"font-bold text-lg"}>Duration</h1></div>
+                    <div className={"lg:w-[15%] lg:block hidden "}><h1 className={"font-bold text-lg"}>Rating/Score</h1></div>
                 </div>
                 <div className={"overflow-y-scroll max-h-svh flex flex-col gap-2 w-full pb-2"}>
                     {data
-                        .map(g => <div onClick={() => handleRowClick(g.id)} key={g.id} className={"flex flex-row w-full items-center justify-around  "}>
-                        <div className={"lg:w-[15%] w-1/3"}><img src={g.cover_url} alt={g.title} /></div>
-                        <div className={"lg:w-[33%] w-1/3 align-"}>{g.title} ({getYear(g.release_date)})</div>
-                        <div className={"lg:w-[7%] w-1/3 align-middle "}>{status.statusLabels[g.status]}</div>
+                        .map(g => <div onClick={() => handleRowClick(g.id)} key={g.id} className={"flex flex-row w-full gap-2 items-center justify-around"}>
+                        <div className={"lg:w-[15%] w-1/2"}><img src={g.cover_url} alt={g.title} /></div>
+                        <div className={"lg:w-[40%] w-1/2 align-middle"}>{g.title} ({getYear(g.release_date)})</div>
+                        <div className={"lg:w-[15%] w-1/3 align-middle "}>{status.statusLabels[g.status]}</div>
+                        <div className={"lg:w-[15%] lg:block hidden align-middle"}>{g.time_to_beat.length > 0 ? g.time_to_beat[0] : 0}h</div>
+                        <div className={"lg:w-[15%] lg:block hidden align-middle"}>{g.rating ?? 0}/{g.score ?? 0}</div>
                     </div>)}
                 </div>
             </div>

@@ -39,6 +39,7 @@ export default function GameDetailEdit({game, setGame, handleClose, handleEdit, 
                     <div><span className={"font-bold"}>Title:</span> {game.title}</div>
                     <div><span className={"font-bold"}>Genres:</span> {game.genres.join(", ").trim()}</div>
                     <div><span className={"font-bold"}>Platforms:</span> {game.platforms.join(", ").trim()}</div>
+                    <div><span className={"font-bold"}>Duration:</span> {game.time_to_beat[0]}h (Main) {game.time_to_beat[1]}h (+Extra) {game.time_to_beat[2]}h (100%)</div>
                     <div className={"text-black"}><label>
                         <span className={"font-bold dark:text-white mr-2"}>Status:</span> <select value={game.status} onChange={(e) => handleSelectChange(e)}>
                         <option value={"START"}>Started</option>
@@ -92,6 +93,7 @@ export default function GameDetailEdit({game, setGame, handleClose, handleEdit, 
                     <div><span className={"font-bold"}>Title:</span> {game.title}</div>
                     <div><span className={"font-bold"}>Genres:</span> {game.genres.join(", ").trim()}</div>
                     <div><span className={"font-bold"}>Platforms:</span> {game.platforms.join(", ").trim()}</div>
+                    <div><span className={"font-bold"}>Duration:</span> {game.time_to_beat[0]}h (Main) {game.time_to_beat[1]}h (+Extra) {game.time_to_beat[2]}h (100%)</div>
                     <div><span className={"font-bold"}>Status:</span> {status.statusLabels[game.status]}</div>
                     <div hidden={game.status!==status.COMPLETED}><span className={"font-bold"}>Score:</span> {game.score}</div>
                     <div><span className={"font-bold"}>Rating:</span> {rating}</div>

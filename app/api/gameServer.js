@@ -1,11 +1,7 @@
 'use server'
-import {promises as fs} from 'fs'
 import {sql} from "@vercel/postgres";
-import {NextResponse} from "next/server";
-import {convertArrayForDB} from "@/app/utils/utils";
-import {revalidatePath} from "next/cache";
-import {redirect} from "next/navigation";
 import {unstable_noStore} from "next/cache";
+import {HowLongToBeatService} from "howlongtobeat";
 
 const base_url = 'https://api.igdb.com/v4'
 const headers = {
@@ -13,6 +9,7 @@ const headers = {
     'Authorization': `Bearer ${process.env.IGDB_TOKEN}`
 }
 const requested_fields = 'fields id,aggregated_rating,cover.url,first_release_date,genres.name,name,platforms.name,summary'
+const hltbService = new HowLongToBeatService()
 const formatDbData = (json) => {
     return json.map(item => {
         let mapped = {}
@@ -22,6 +19,10 @@ const formatDbData = (json) => {
 
         if ('rating' in mapped && mapped.rating) {
             mapped.rating /= 100
+        }
+
+        if ('time_to_beat' in mapped && mapped.time_to_beat) {
+            mapped.time_to_beat = mapped.time_to_beat.map(ttb => ttb/100)
         }
 
         if ('genres' in mapped && mapped.genres) {
@@ -70,23 +71,37 @@ export async function searchGame(game) {
     return res.json()
 }
 
-export async function getGames() {
-    unstable_noStore()
-    const {rows} = await sql`select * from "Games" order by id asc`
-    return formatDbData(rows)
-}
-
-export async function addGame(game) {
+export async function insertGame(game) {
     try {
         unstable_noStore()
-        await sql`INSERT INTO "Games"(title, igdb_id, cover_url, score, rating, summary, comments, genres, platforms, release_date, start_date, finish_date, status, "user")
-                VALUES (${game.title}, ${game.igdb_id}, ${game.cover_url}, ${game.score}, ${game.rating}, ${game.summary}, ${game.comments}, ${game.genres}, ${game.platforms}, ${game.release_date}, ${game.start_date}, ${game.finish_date}, ${game.status}, ${game.user});`
+        await sql`INSERT INTO "Games"(title, igdb_id, cover_url, score, rating, summary, comments, genres, platforms, release_date, start_date, finish_date, status, "user", time_to_beat)
+                VALUES (${game.title}, ${game.igdb_id}, ${game.cover_url}, ${game.score}, ${game.rating}, ${game.summary}, ${game.comments}, 
+                ${game.genres}, ${game.platforms}, ${game.release_date}, ${game.start_date}, ${game.finish_date}, ${game.status}, ${game.user},
+                ${game.time_to_beat});`
 
         const res = await sql`select * from "Games" where igdb_id=${game.igdb_id}`
         return formatDbData(res.rows)[0]
     } catch (error) {
-        return {status:500,message:'Database error'}
+        return {status: 500, message: 'Database error'}
     }
+}
+
+export async function getGames(user) {
+    unstable_noStore()
+    const {rows} = await sql`select * from "Games" where "user"=${user} order by id asc`
+    return formatDbData(rows)
+}
+
+export async function addGame(game) {
+    return hltbService.search(game.title)
+        .then(htlbEntry => {
+            console.log(htlbEntry)
+            game.time_to_beat = [htlbEntry[0].gameplayMain, htlbEntry[0].gameplayMainExtra, htlbEntry[0].gameplayCompletionist].map(t => Math.round(t * 100))
+            return insertGame(game)
+        }).catch(async () => {
+            game.time_to_beat = []
+            return insertGame(game)
+        })
 }
 
 export async function updateGame(game) {

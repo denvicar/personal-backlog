@@ -24,7 +24,7 @@ export default function GameSearch({searchResult,handleAdd,search, filter, setFi
 
     return (
         <>
-        <div className={"flex flex-col gap-1 w-[35%] text-black h-svh flex-grow-0 pt-5 pb-2"}>
+        <div className={"flex flex-col gap-1 lg:w-[35%] w-[30%] text-black h-svh flex-grow-0 pt-5 pb-2"}>
             <input type={"text"} placeholder={"Filter list..."} className={"py-1 bg-gray-600 rounded-xl px-2 mb-2"} value={filter} onChange={(e) => setFilter(e.target.value)} />
             <input type={"text"} placeholder={"Game title"} onKeyDown={(e)=>handleKeyPress(e)} value={game.title} onChange={(e)=>setGame({...game,title:e.target.value})} />
             <select className={"py-0.5"} value={game.status} onChange={(e) => setGame({...game,status:e.target.value})}>
