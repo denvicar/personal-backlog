@@ -6,10 +6,10 @@ import GameDetail from "@/app/components/gameDetail";
 import GameSearch from "@/app/components/gameSearch";
 import Fuse from 'fuse.js'
 import Alert from "@/app/components/alert";
-import {getDateFromIGDB, getDateStringFromDB} from "@/app/utils/utils";
+import {getDateFromIGDB, getDateStringFromDB, mapValuesForInput} from "@/app/utils/utils";
+import {status} from "@/app/utils/constants";
 
-
-export default function GameList({games}) {
+export default function GameList({games,user}) {
     let [displayedGames, setDisplayedGames] = useState(games)
     let [searchResult, setSearchResult] = useState([])
     let [gameDetail, setGameDetail] = useState({})
@@ -42,7 +42,6 @@ export default function GameList({games}) {
         let newGame = {
             title: correctResult.name,
             cover_url: `http:${correctResult.cover.url.replace('t_thumb','t_cover_big')}`,
-            id: games[games.length-1].id+1,
             igdb_id: correctResult.id,
             summary: correctResult.summary,
             genres: correctResult.genres.map(g => g.name),
@@ -53,7 +52,8 @@ export default function GameList({games}) {
             status: game.status,
             rating: correctResult.aggregated_rating ? Math.round(correctResult.aggregated_rating*100) : 0,
             score: game.score,
-            comments: game.comments
+            comments: game.comments,
+            user: user.name
         }
         const res = await addGame(newGame)
         setDisplayedGames([...displayedGames,res])
@@ -61,7 +61,7 @@ export default function GameList({games}) {
 
     const handleRowClick = (id) => {
         const pickedGame = displayedGames.find(g => g.id===id)
-        setGameDetail(pickedGame)
+        setGameDetail(mapValuesForInput(pickedGame))
         setDetailShow(true)
     }
 
@@ -90,7 +90,7 @@ export default function GameList({games}) {
                         .map(g => <div onClick={() => handleRowClick(g.id)} key={g.id} className={"flex flex-row w-full items-center justify-around  "}>
                         <div className={"lg:w-[15%] w-1/3"}><img src={g.cover_url} /></div>
                         <div className={"lg:w-[33%] w-1/3 align-"}>{g.title} ({getYear(g.release_date)})</div>
-                        <div className={"lg:w-[7%] w-1/3 align-middle "}>{g.status}</div>
+                        <div className={"lg:w-[7%] w-1/3 align-middle "}>{status.statusLabels[g.status]}</div>
                     </div>)}
                 </div>
             </div>

@@ -1,11 +1,34 @@
 'use client'
 import {status} from "@/app/utils/constants";
 import {useState} from "react";
+import {getDateStringFromDB, mapValuesForDB} from "@/app/utils/utils";
 
 export default function GameDetail({game, setGame, handleClose, handleEdit, visible, handleDelete}) {
     let [edit, setEdit] = useState(false)
     let rating = game.rating ? game.rating : 0
     rating = Math.round(rating*100)/100
+
+    const handleSelectChange = (e) => {
+        let updatedGame = game
+        switch (e.target.value) {
+            case status.STARTED:
+                updatedGame = {...game, finish_date: '', score: 0, start_date: getDateStringFromDB(Date.now()), status: e.target.value}
+                break
+            case status.COMPLETED:
+                updatedGame = {...game, finish_date: getDateStringFromDB(Date.now()), status: e.target.value}
+                break
+            case status.PLANNED:
+                updatedGame = {...game, start_date: '', finish_date: '', score: 0, status: e.target.value}
+                break
+            case status.DROPPED:
+                updatedGame = {...game, finish_date: '', status: e.target.value}
+                break
+        }
+        setGame(updatedGame)
+
+    }
+
+
     if (!visible) return null;
     if (edit) return (
         <div className={"flex flex-col gap-2 items-end w-[40%] fixed top-[15%] left-[30%] max-h-[70%] overflow-hidden p-8 border-2 dark:border-white border-black rounded-xl z-10 bg-black"}>
@@ -17,7 +40,7 @@ export default function GameDetail({game, setGame, handleClose, handleEdit, visi
                     <div><span className={"font-bold"}>Genres:</span> {game.genres.join(", ").trim()}</div>
                     <div><span className={"font-bold"}>Platforms:</span> {game.platforms.join(", ").trim()}</div>
                     <div className={"text-black"}><label>
-                        <span className={"font-bold dark:text-white mr-2"}>Status:</span> <select value={game.status} onChange={(e) => setGame({...game,status:e.target.value})}>
+                        <span className={"font-bold dark:text-white mr-2"}>Status:</span> <select value={game.status} onChange={(e) => handleSelectChange(e)}>
                         <option value={"START"}>Started</option>
                         <option value={"PLAN"}>Planned</option>
                         <option value={"COMP"}>Completed</option>
@@ -55,7 +78,7 @@ export default function GameDetail({game, setGame, handleClose, handleEdit, visi
                 <button className={"border-2 rounded dark:border-white border-black px-2 py-1"} onClick={() => setEdit(false)}>Cancel</button>
                 <button className={"border-2 rounded dark:border-white border-black px-2 py-1"} onClick={()=>{
                     setEdit(false)
-                    handleEdit(game)
+                    handleEdit(mapValuesForDB(game))
                 }}>Confirm</button>
             </div>
         </div>

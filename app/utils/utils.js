@@ -17,3 +17,19 @@ export const convertArrayForDB = (arr) => {
     s += "}'"
     return s
 }
+
+export const mapValuesForInput = (game) => {
+    return {...game,
+        start_date: game.start_date !== null ? game.start_date : '',
+        finish_date: game.finish_date !== null ? game.finish_date : '',
+        score: game.score !== null ? game.score : 0
+    }
+}
+
+export const mapValuesForDB = (game) => {
+    return {...game,
+        start_date: game.start_date !== '' ? game.start_date : null,
+        finish_date: game.finish_date !== '' ? game.finish_date : null,
+        score: game.score !== 0 ? game.score : null
+    }
+}

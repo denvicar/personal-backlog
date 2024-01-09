@@ -1,6 +1,6 @@
 'use server'
 import {promises as fs} from 'fs'
-import {sql} from "@vercel/postgres";
+import {sql, db} from "@vercel/postgres";
 import {NextResponse} from "next/server";
 import {convertArrayForDB} from "@/app/utils/utils";
 import {revalidatePath} from "next/cache";
@@ -13,7 +13,7 @@ const headers = {
     'Authorization': `Bearer ${process.env.IGDB_TOKEN}`
 }
 const requested_fields = 'fields id,aggregated_rating,cover.url,first_release_date,genres.name,name,platforms.name,summary'
-
+const client = await db.connect()
 const formatDbData = (json) => {
     return json.map(item => {
         let mapped = {}
@@ -63,7 +63,6 @@ const formatDbData = (json) => {
     })
 }
 export async function searchGame(game) {
-    console.log('querying')
     const res = await fetch(`${base_url}/games`, {
         method: 'POST',
         headers: headers,
@@ -73,14 +72,17 @@ export async function searchGame(game) {
 }
 
 export async function getGames() {
-    const {rows} = await sql`select * from "Games" order by id asc`
+    unstable_noStore()
+    const {rows} = await client.sql`select * from "Games" order by id asc`
     return formatDbData(rows)
 }
 
 export async function addGame(game) {
     try {
-        await sql`INSERT INTO "Games"(title, igdb_id, cover_url, score, rating, summary, comments, genres, platforms, release_date, start_date, finish_date, status)
-                VALUES (${game.title}, ${game.igdb_id}, ${game.cover_url}, ${game.score}, ${game.rating}, ${game.summary}, ${game.comments}, ${game.genres}, ${game.platforms}, ${game.release_date}, ${game.start_date}, ${game.finish_date}, ${game.status});`
+        unstable_noStore()
+        await sql`INSERT INTO "Games"(title, igdb_id, cover_url, score, rating, summary, comments, genres, platforms, release_date, start_date, finish_date, status, "user")
+                VALUES (${game.title}, ${game.igdb_id}, ${game.cover_url}, ${game.score}, ${game.rating}, ${game.summary}, ${game.comments}, ${game.genres}, ${game.platforms}, ${game.release_date}, ${game.start_date}, ${game.finish_date}, ${game.status}, ${game.user});`
+
         const res = await sql`select * from "Games" where igdb_id=${game.igdb_id}`
         return formatDbData(res.rows)[0]
     } catch (error) {
