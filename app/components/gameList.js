@@ -6,7 +6,7 @@ import GameDetailEdit from "@/app/components/gameDetailEdit";
 import GameSearch from "@/app/components/gameSearch";
 import Fuse from 'fuse.js'
 import Alert from "@/app/components/alert";
-import {getDateFromIGDB, getDateStringFromDB, mapValuesForInput} from "@/app/utils/utils";
+import {compareGames, getDateFromIGDB, getDateStringFromDB, mapValuesForInput} from "@/app/utils/utils";
 import {status} from "@/app/utils/constants";
 
 export default function GameList({games,user}) {
@@ -24,7 +24,7 @@ export default function GameList({games,user}) {
     }
     const fuse = new Fuse(displayedGames,options)
 
-    const data = filter === '' ? displayedGames : fuse.search(filter, {limit:15}).map(f=>f.item)
+    let data = filter === '' ? displayedGames : fuse.search(filter, {limit:15}).map(f=>f.item)
 
 
     const getYear = (ts) => {
