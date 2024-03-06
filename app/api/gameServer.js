@@ -4,10 +4,26 @@ import {unstable_noStore} from "next/cache";
 import {HowLongToBeatService} from "howlongtobeat";
 
 const base_url = 'https://api.igdb.com/v4'
-const headers = {
+const auth_url = 'https://id.twitch.tv/oauth2/token?'
+
+let access_token = process.env.IGDB_TOKEN
+let headers = {
     'Client-ID': process.env.IGDB_CLIENT_ID,
     'Authorization': `Bearer ${process.env.IGDB_TOKEN}`
 }
+
+const authenticate = async () => {
+    const params = new URLSearchParams({
+        client_id: process.env.IGDB_CLIENT_ID,
+        client_secret: process.env.IGDB_CLIENT_SECRET,
+        grant_type: 'client_credentials'
+    })
+    const res = await fetch(auth_url + params, {method: 'POST'})
+    let data = await res.json();
+    access_token = data.access_token
+    headers = {...headers, 'Authorization': `Bearer ${access_token}`}
+}
+
 const requested_fields = 'fields id,aggregated_rating,cover.url,first_release_date,genres.name,name,platforms.name,summary'
 const hltbService = new HowLongToBeatService()
 const formatDbData = (json) => {
@@ -68,7 +84,13 @@ export async function searchGame(game) {
         headers: headers,
         body: `${requested_fields}; search "${game}";`
     })
-    return res.json()
+    let data = await res.json();
+    if (data.message && data.message.startsWith('Authorization')) {
+        await authenticate()
+        return searchGame(game)
+    }
+
+    return data;
 }
 
 export async function insertGame(game) {

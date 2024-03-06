@@ -80,7 +80,7 @@ export default function GameList({games,user}) {
     return (<>
         <div className={"flex flex-row mx-auto lg:w-[65%] w-[80%] items-start gap-3 h-svh "}>
             <div className={"flex flex-col gap-2 m-auto h-svh flex-shrink-0 w-[70%]"}>
-                <div className={"flex flex-row w-full justify-around border-b-2 border-b-black dark:border-b-white relative top-0 left-0 bg-black"}>
+                <div className={"flex flex-row w-full justify-around border-b-2 border-b-black dark:border-b-white relative top-0 left-0"}>
                     <div className={"lg:w-[15%] w-1/3"}><h1 className={"font-bold text-lg"}>Cover</h1></div>
                     <div className={"lg:w-[40%] w-1/3"}><h1 className={"font-bold text-lg"}>Title</h1></div>
                     <div className={"lg:w-[15%] w-1/3"}><h1 className={"font-bold text-lg"}>Status</h1></div>
