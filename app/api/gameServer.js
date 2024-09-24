@@ -1,7 +1,7 @@
 'use server'
 import {sql} from "@vercel/postgres";
 import {unstable_noStore} from "next/cache";
-import {HowLongToBeatService} from "howlongtobeat";
+import { HltbService } from "../lib/hltb/hltbService";
 
 const base_url = 'https://api.igdb.com/v4'
 const auth_url = 'https://id.twitch.tv/oauth2/token?'
@@ -25,7 +25,7 @@ const authenticate = async () => {
 }
 
 const requested_fields = 'fields id,aggregated_rating,cover.url,first_release_date,genres.name,name,platforms.name,summary'
-const hltbService = new HowLongToBeatService()
+const hltbService = new HltbService()
 const formatDbData = (json) => {
     return json.map(item => {
         let mapped = {}
@@ -120,7 +120,8 @@ export async function addGame(game) {
             console.log(htlbEntry)
             game.time_to_beat = [htlbEntry[0].gameplayMain, htlbEntry[0].gameplayMainExtra, htlbEntry[0].gameplayCompletionist].map(t => Math.round(t * 100))
             return insertGame(game)
-        }).catch(async () => {
+        }).catch(async (e) => {
+            console.log(e)
             game.time_to_beat = []
             return insertGame(game)
         })

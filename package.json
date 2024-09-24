@@ -11,12 +11,15 @@
   "dependencies": {
     "@auth/core": "^0.20.0",
     "@vercel/postgres": "^0.5.1",
+    "axios": "^1.7.7",
+    "cheerio": "^1.0.0",
+    "fast-levenshtein": "^3.0.0",
     "fuse.js": "^7.0.0",
-    "howlongtobeat": "^1.8.0",
-    "next": "14.0.4",
+    "next": "14.2.4",
     "next-auth": "^5.0.0-beta.4",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "user-agents": "^1.1.325"
   },
   "devDependencies": {
     "autoprefixer": "^10.0.1",
