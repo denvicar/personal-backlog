@@ -7,6 +7,7 @@ export class HltbSearch {
     static REFERER_HEADER = HltbSearch.BASE_URL
     static SEARCH_URL = HltbSearch.BASE_URL + 'api/search'
     static GAME_URL = HltbSearch.BASE_URL + 'game'
+    static storedApiKey = ''
 
     static getSearchHeaders() {
         const headers = {
@@ -55,9 +56,13 @@ export class HltbSearch {
     static async searchGame(name) {
         const headers = HltbSearch.getSearchHeaders()
         const payload = HltbSearch.getSearchData(name)
-        let apiKey = await HltbSearch.getRequestCode(false)
-        if (!apiKey) {
-            apiKey = await HltbSearch.getRequestCode(true)
+        let apiKey = HltbSearch.storedApiKey
+        if (apiKey === '') {
+            apiKey = await HltbSearch.getRequestCode(false)
+            if (!apiKey) {
+                apiKey = await HltbSearch.getRequestCode(true)
+            }
+            HltbSearch.storedApiKey = apiKey
         }
         const searchUrl = HltbSearch.SEARCH_URL + '/' + apiKey
         let response = await axios.post(searchUrl, payload, {
