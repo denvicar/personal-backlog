@@ -3,25 +3,181 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  color-scheme: light;
+  --background: 248 245 239;
+  --background-soft: 239 234 225;
+  --surface: 255 252 247;
+  --surface-strong: 244 238 228;
+  --foreground: 34 39 46;
+  --muted: 91 99 110;
+  --border: 197 184 163;
+  --border-strong: 115 94 69;
+  --accent: 180 94 47;
+  --accent-strong: 133 66 34;
+  --accent-soft: 233 209 188;
+  --success-soft: 207 230 215;
+  --danger-soft: 242 205 205;
+  --shadow-color: 74 54 36;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    color-scheme: dark;
+    --background: 16 24 29;
+    --background-soft: 23 34 40;
+    --surface: 26 38 45;
+    --surface-strong: 35 49 58;
+    --foreground: 239 232 220;
+    --muted: 178 171 160;
+    --border: 82 101 112;
+    --border-strong: 140 114 88;
+    --accent: 226 154 107;
+    --accent-strong: 243 193 154;
+    --accent-soft: 73 52 38;
+    --success-soft: 49 79 65;
+    --danger-soft: 103 53 57;
+    --shadow-color: 0 0 0;
   }
 }
 
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+}
+
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  min-height: 100vh;
+  color: rgb(var(--foreground));
+  background:
+    radial-gradient(circle at top left, rgb(var(--accent-soft) / 0.65), transparent 28%),
+    radial-gradient(circle at top right, rgb(var(--border) / 0.32), transparent 24%),
+    linear-gradient(180deg, rgb(var(--background)) 0%, rgb(var(--background-soft)) 100%);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgb(var(--accent) / 0.22);
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .app-shell {
+    @apply min-h-screen px-4 py-6 sm:px-6 lg:px-10;
+  }
+
+  .app-frame {
+    @apply mx-auto flex w-full max-w-7xl flex-col gap-6;
+  }
+
+  .panel {
+    background: rgb(var(--surface) / 0.88);
+    border: 1px solid rgb(var(--border) / 0.85);
+    box-shadow: 0 18px 50px -32px rgb(var(--shadow-color) / 0.45);
+    @apply rounded-[28px] backdrop-blur;
+  }
+
+  .panel-strong {
+    background: rgb(var(--surface-strong) / 0.95);
+    border: 1px solid rgb(var(--border-strong) / 0.5);
+    @apply rounded-[24px];
+  }
+
+  .input-base {
+    background: rgb(var(--background) / 0.75);
+    border: 1px solid rgb(var(--border) / 0.95);
+    color: rgb(var(--foreground));
+    @apply w-full rounded-2xl px-4 py-3 outline-none transition duration-200;
+  }
+
+  .input-base::placeholder {
+    color: rgb(var(--muted));
+  }
+
+  .input-base:focus {
+    border-color: rgb(var(--accent));
+    box-shadow: 0 0 0 4px rgb(var(--accent) / 0.14);
+  }
+
+  .button-base {
+    @apply inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold transition duration-200;
+  }
+
+  .button-primary {
+    background: rgb(var(--accent));
+    color: rgb(255 248 242);
+    box-shadow: 0 14px 30px -18px rgb(var(--accent) / 0.95);
+  }
+
+  .button-primary:hover {
+    background: rgb(var(--accent-strong));
+  }
+
+  .button-secondary {
+    background: rgb(var(--surface-strong));
+    border: 1px solid rgb(var(--border));
+    color: rgb(var(--foreground));
+  }
+
+  .button-secondary:hover {
+    border-color: rgb(var(--border-strong));
+    transform: translateY(-1px);
+  }
+
+  .button-danger {
+    background: rgb(var(--danger-soft));
+    color: rgb(var(--foreground));
+  }
+
+  .eyebrow {
+    color: rgb(var(--muted));
+    @apply text-xs font-semibold uppercase tracking-[0.26em];
+  }
+
+  .muted {
+    color: rgb(var(--muted));
+  }
+
+  .status-pill {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
+  }
+
+  .modal-backdrop {
+    background: rgb(15 23 32 / 0.55);
+    @apply fixed inset-0 z-40 flex items-center justify-center px-3 py-4 backdrop-blur-sm;
+  }
+
+  .scrollable {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--border-strong) / 0.7) transparent;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding-inline: 0.9rem;
+    padding-block: 0.9rem 1.2rem;
+  }
 }

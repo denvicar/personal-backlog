@@ -1,12 +1,17 @@
 'use client'
 export default function Alert({handleConfirm, handleCancel, gameTitle}) {
     return (
-        <div className={"z-20 absolute top-[30%] left-[42%] w-[16%] h-fit rounded-2xl px-7 py-2 dark:bg-black bg-white text-black dark:text-white border-2 dark:border-white border-black "}>
-            <h1 className={"font-bold text-lg"}>Game deletion</h1>
-            <p>Are you sure you want to delete {gameTitle} from the list?</p>
-            <div className={"flex flex-row justify-evenly mt-2"}>
-                <button className={"dark:bg-white bg-black dark:text-black text-white px-2 py-1 rounded hover:bg-gray-400 font-bold"} onClick={()=>handleConfirm()}>Confirm</button>
-                <button className={"dark:bg-white bg-black dark:text-black text-white px-2 py-1 rounded hover:bg-gray-400 font-bold"} onClick={()=>handleCancel()}>Cancel</button>
+        <div className={"modal-backdrop"} onClick={handleCancel}>
+            <div className={"panel relative z-50 w-full max-w-md px-5 py-5 sm:px-6"} onClick={(e) => e.stopPropagation()}>
+                <p className={"eyebrow"}>Delete Entry</p>
+                <h2 className={"mt-2 text-2xl font-semibold"}>Remove this game?</h2>
+                <p className={"muted mt-3 text-sm leading-6"}>
+                    {gameTitle} will be removed from your backlog and its notes, dates, and score will be lost.
+                </p>
+                <div className={"mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"}>
+                    <button className={"button-base button-secondary"} onClick={() => handleCancel()}>Cancel</button>
+                    <button className={"button-base button-danger"} onClick={() => handleConfirm()}>Delete game</button>
+                </div>
             </div>
         </div>
     )

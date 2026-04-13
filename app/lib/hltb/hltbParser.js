@@ -39,7 +39,7 @@ export class HltbParser {
     }
 
     static roundTime(a) {
-        const hours = Math.trunc(a / 36)/100
+        const hours = a / 36
         return Math.round(hours*2)/2
     }
 

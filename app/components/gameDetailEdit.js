@@ -1,12 +1,20 @@
 'use client'
 import {status} from "@/app/utils/constants";
 import {useState} from "react";
+import Image from "next/image";
 import {getDateStringFromDB, mapValuesForDB} from "@/app/utils/utils";
 
+const statusTone = {
+    [status.STARTED]: "bg-emerald-200/70 text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-100",
+    [status.PLANNED]: "bg-sky-200/75 text-sky-900 dark:bg-sky-900/45 dark:text-sky-100",
+    [status.COMPLETED]: "bg-amber-200/75 text-amber-900 dark:bg-amber-900/45 dark:text-amber-100",
+    [status.DROPPED]: "bg-rose-200/75 text-rose-900 dark:bg-rose-950/45 dark:text-rose-100",
+}
+
 export default function GameDetailEdit({game, setGame, handleClose, handleEdit, visible, handleDelete}) {
-    let [edit, setEdit] = useState(false)
+    const [edit, setEdit] = useState(false)
     let rating = game.rating ? game.rating : 0
-    rating = Math.round(rating*100)/100
+    rating = Math.round(rating * 100) / 100
 
     const handleSelectChange = (e) => {
         let updatedGame = game
@@ -25,87 +33,154 @@ export default function GameDetailEdit({game, setGame, handleClose, handleEdit, 
                 break
         }
         setGame(updatedGame)
-
     }
 
-
     if (!visible) return null;
-    if (edit) return (
-        <div className={"flex bg-white dark:bg-black flex-col gap-2 items-end lg:w-[40%] fixed top-[5%] left-[10%] lg:top-[15%] lg:left-[30%] lg:max-h-[70%] max-h-[90%] overflow-hidden p-8 border-2 dark:border-white border-black rounded-xl z-10  w-[80%]"}>
-            <button className={"font-bold text-xl"} onClick={handleClose}>x</button>
-            <div className={"flex h-[90%] flex-col lg:flex-row gap-2 overflow-y-scroll"}>
-                <div className={"w-[60%] lg:w-fit flex-shrink-0"}><img src={game.cover_url} alt={game.title} /> </div>
-                <div className={"flex flex-col w-fit overflow-y-scroll"}>
-                    <div><span className={"font-bold"}>Title:</span> {game.title}</div>
-                    <div><span className={"font-bold"}>Genres:</span> {game.genres.join(", ").trim()}</div>
-                    <div><span className={"font-bold"}>Platforms:</span> {game.platforms.join(", ").trim()}</div>
-                    <div><span className={"font-bold"}>Duration:</span> {game.time_to_beat[0]}h (Main) {game.time_to_beat[1]}h (+Extra) {game.time_to_beat[2]}h (100%)</div>
-                    <div className={"text-black"}><label>
-                        <span className={"font-bold dark:text-white mr-2"}>Status:</span> <select value={game.status} onChange={(e) => handleSelectChange(e)}>
-                        <option value={"START"}>Started</option>
-                        <option value={"PLAN"}>Planned</option>
-                        <option value={"COMP"}>Completed</option>
-                        <option value={"DROP"}>Dropped</option>
-                    </select></label></div>
-                    <div hidden={game.status!==status.COMPLETED} className={"text-black"}>
-                        <label>
-                            <span className={"font-bold dark:text-white mr-2"}>Score:</span>
-                            <input type={"number"} value={game.score} onChange={(e)=>setGame({...game,score:e.target.value})} />
-                        </label>
-                    </div>
-                    <div><span className={"font-bold"}>Rating:</span> {rating}</div>
-                    <div className={"text-black"}>
-                        <label>
-                            <span className={"font-bold dark:text-white mr-2"}>Started on:</span>
-                            <input type={"date"} value={game.start_date} onChange={(e)=>setGame({...game,start_date:e.target.value})} />
-                        </label>
-                    </div>
-                    <div hidden={game.status!==status.COMPLETED} className={"text-black"}>
-                        <label>
-                            <span className={"font-bold dark:text-white mr-2"}>Finished on:</span>
-                            <input type={"date"} value={game.finish_date} onChange={(e)=>setGame({...game,finish_date:e.target.value})} />
-                        </label>
-                    </div>
-                    <div><span className={"font-bold"}>Summary:</span> {game.summary}</div>
-                    <div className={"text-black"}>
-                        <label>
-                            <span className={"font-bold dark:text-white mr-2"}>Notes:</span>
-                            <textarea placeholder={"Comments..."} value={game.comments} onChange={(e)=>setGame({...game,comments:e.target.value})} />
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div className={"w-full flex flex-row justify-between"}>
-                <button className={"border-2 rounded dark:border-white border-black px-2 py-1"} onClick={() => setEdit(false)}>Cancel</button>
-                <button className={"border-2 rounded dark:border-white border-black px-2 py-1"} onClick={()=>{
-                    setEdit(false)
-                    handleEdit(mapValuesForDB(game))
-                }}>Confirm</button>
-            </div>
-        </div>
-    )
+
+    const onConfirm = () => {
+        setEdit(false)
+        handleEdit(mapValuesForDB(game))
+    }
+
     return (
-        <div className={"flex bg-white dark:bg-black flex-col gap-2 items-end lg:w-[40%] fixed top-[5%] left-[10%] lg:top-[15%] lg:left-[30%] lg:max-h-[70%] max-h-[90%] overflow-hidden p-8 border-2 dark:border-white border-black rounded-xl z-20 w-[80%]"}>
-            <button className={"font-bold text-2xl"} onClick={handleClose}>x</button>
-            <div className={"flex h-[90%] flex-col lg:flex-row gap-2 overflow-y-scroll"}>
-                <div className={"w-[60%] lg:w-fit flex-shrink-0"}><img src={game.cover_url} alt={game.title} /> </div>
-                <div className={"flex flex-col w-fit overflow-y-scroll"}>
-                    <div><span className={"font-bold"}>Title:</span> {game.title}</div>
-                    <div><span className={"font-bold"}>Genres:</span> {game.genres.join(", ").trim()}</div>
-                    <div><span className={"font-bold"}>Platforms:</span> {game.platforms.join(", ").trim()}</div>
-                    <div><span className={"font-bold"}>Duration:</span> {game.time_to_beat[0]}h (Main) {game.time_to_beat[1]}h (+Extra) {game.time_to_beat[2]}h (100%)</div>
-                    <div><span className={"font-bold"}>Status:</span> {status.statusLabels[game.status]}</div>
-                    <div hidden={game.status!==status.COMPLETED}><span className={"font-bold"}>Score:</span> {game.score}</div>
-                    <div><span className={"font-bold"}>Rating:</span> {rating}</div>
-                    <div><span className={"font-bold"}>Started on:</span> {game.start_date}</div>
-                    <div hidden={game.status!==status.COMPLETED}><span className={"font-bold"}>Finished on:</span> {game.finish_date}</div>
-                    <div><span className={"font-bold"}>Summary:</span> {game.summary}</div>
-                    <div><span className={"font-bold"}>Notes:</span> {game.comments}</div>
+        <div className={"modal-backdrop"} onClick={handleClose}>
+            <div className={"panel scrollable relative z-50 flex max-h-[94vh] w-full max-w-5xl flex-col overflow-y-auto px-4 py-4 sm:px-6 sm:py-6"} onClick={(e) => e.stopPropagation()}>
+                <div className={"mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"}>
+                    <div>
+                        <p className={"eyebrow"}>{edit ? "Edit Entry" : "Game Entry"}</p>
+                        <h2 className={"mt-1 text-3xl font-semibold"}>{game.title}</h2>
+                        <div className={"mt-3 flex flex-wrap gap-2"}>
+                            <span className={`status-pill ${statusTone[game.status]}`}>{status.statusLabels[game.status]}</span>
+                            <span className={"status-pill bg-white/55 dark:bg-white/10"}>{game.time_to_beat?.[0] ?? 0}h main</span>
+                            <span className={"status-pill bg-white/55 dark:bg-white/10"}>{rating} critic</span>
+                        </div>
+                    </div>
+                    <button className={"button-base button-secondary px-3 py-2"} onClick={handleClose}>Close</button>
                 </div>
-            </div>
-            <div className={"w-full flex flex-row justify-between"}>
-                <button className={"border-2 rounded dark:border-white border-black px-2 py-1"} onClick={() => handleDelete()}>Delete game</button>
-                <button className={"border-2 rounded dark:border-white border-black px-2 py-1"} onClick={() => setEdit(true)}>Edit</button>
+
+                <div className={"grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]"}>
+                    <div className={"space-y-4"}>
+                        <div className={"overflow-hidden rounded-[24px] bg-[rgb(var(--background))]"}>
+                            {game.cover_url
+                                ? <Image className={"aspect-[3/4] h-full w-full object-cover"} width={260} height={346} src={game.cover_url.replace('http:', 'https:')} alt={game.title}/>
+                                : <div className={"flex aspect-[3/4] items-center justify-center px-4 text-center text-sm muted"}>No cover</div>}
+                        </div>
+                        <div className={"panel-strong px-4 py-4"}>
+                            <p className={"eyebrow"}>Play time</p>
+                            <div className={"mt-3 grid gap-3 text-sm sm:grid-cols-3"}>
+                                <div>
+                                    <span className={"font-semibold"}>Main</span>
+                                    <p className={"mt-1 muted"}>{game.time_to_beat?.[0] ?? 0}h</p>
+                                </div>
+                                <div>
+                                    <span className={"font-semibold"}>Main + Extra</span>
+                                    <p className={"mt-1 muted"}>{game.time_to_beat?.[1] ?? 0}h</p>
+                                </div>
+                                <div>
+                                    <span className={"font-semibold"}>100%</span>
+                                    <p className={"mt-1 muted"}>{game.time_to_beat?.[2] ?? 0}h</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {edit ? (
+                        <div className={"space-y-4"}>
+                            <div className={"panel-strong px-4 py-4"}>
+                                <p className={"eyebrow"}>Metadata</p>
+                                <div className={"mt-3 space-y-3 text-sm"}>
+                                    <div><span className={"font-semibold"}>Genres:</span> {game.genres.join(", ").trim()}</div>
+                                    <div><span className={"font-semibold"}>Platforms:</span> {game.platforms.join(", ").trim()}</div>
+                                    <div><span className={"font-semibold"}>Rating:</span> {rating}</div>
+                                </div>
+                            </div>
+
+                            <div className={"panel-strong space-y-4 px-4 py-4"}>
+                                <label className={"block"}>
+                                    <span className={"mb-2 block text-sm font-semibold"}>Status</span>
+                                    <select className={"input-base"} value={game.status} onChange={(e) => handleSelectChange(e)}>
+                                        <option value={"START"}>Started</option>
+                                        <option value={"PLAN"}>Planned</option>
+                                        <option value={"COMP"}>Completed</option>
+                                        <option value={"DROP"}>Dropped</option>
+                                    </select>
+                                </label>
+
+                                {game.status === status.COMPLETED && (
+                                    <label className={"block"}>
+                                        <span className={"mb-2 block text-sm font-semibold"}>Score</span>
+                                        <input type={"number"} className={"input-base"} value={game.score} onChange={(e) => setGame({...game, score: e.target.value})} />
+                                    </label>
+                                )}
+
+                                <div className={"grid gap-3 sm:grid-cols-2"}>
+                                    <label className={"block"}>
+                                        <span className={"mb-2 block text-sm font-semibold"}>Started on</span>
+                                        <input type={"date"} className={"input-base"} value={game.start_date} onChange={(e) => setGame({...game, start_date: e.target.value})} />
+                                    </label>
+                                    {game.status === status.COMPLETED && (
+                                        <label className={"block"}>
+                                            <span className={"mb-2 block text-sm font-semibold"}>Finished on</span>
+                                            <input type={"date"} className={"input-base"} value={game.finish_date} onChange={(e) => setGame({...game, finish_date: e.target.value})} />
+                                        </label>
+                                    )}
+                                </div>
+
+                                <label className={"block"}>
+                                    <span className={"mb-2 block text-sm font-semibold"}>Notes</span>
+                                    <textarea className={"input-base min-h-32 resize-y"} placeholder={"Comments..."} value={game.comments} onChange={(e) => setGame({...game, comments: e.target.value})} />
+                                </label>
+                            </div>
+
+                            <div className={"panel-strong px-4 py-4"}>
+                                <p className={"eyebrow"}>Summary</p>
+                                <p className={"mt-3 text-sm leading-6"}>{game.summary}</p>
+                            </div>
+
+                            <div className={"flex flex-col gap-3 sm:flex-row sm:justify-between"}>
+                                <button className={"button-base button-secondary"} onClick={() => setEdit(false)}>Cancel</button>
+                                <button className={"button-base button-primary"} onClick={onConfirm}>Save changes</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className={"space-y-4"}>
+                            <div className={"grid gap-4 sm:grid-cols-2"}>
+                                <div className={"panel-strong px-4 py-4"}>
+                                    <p className={"eyebrow"}>Genres</p>
+                                    <p className={"mt-3 text-sm"}>{game.genres.join(", ").trim()}</p>
+                                </div>
+                                <div className={"panel-strong px-4 py-4"}>
+                                    <p className={"eyebrow"}>Platforms</p>
+                                    <p className={"mt-3 text-sm"}>{game.platforms.join(", ").trim()}</p>
+                                </div>
+                                <div className={"panel-strong px-4 py-4"}>
+                                    <p className={"eyebrow"}>Score</p>
+                                    <p className={"mt-3 text-sm"}>{game.status === status.COMPLETED ? game.score : "Not scored"}</p>
+                                </div>
+                                <div className={"panel-strong px-4 py-4"}>
+                                    <p className={"eyebrow"}>Dates</p>
+                                    <p className={"mt-3 text-sm"}>Started: {game.start_date || "N/A"}</p>
+                                    <p className={"mt-1 text-sm"}>Finished: {game.finish_date || "N/A"}</p>
+                                </div>
+                            </div>
+
+                            <div className={"panel-strong px-4 py-4"}>
+                                <p className={"eyebrow"}>Summary</p>
+                                <p className={"mt-3 text-sm leading-6"}>{game.summary}</p>
+                            </div>
+
+                            <div className={"panel-strong px-4 py-4"}>
+                                <p className={"eyebrow"}>Notes</p>
+                                <p className={"mt-3 text-sm leading-6"}>{game.comments || "No notes yet."}</p>
+                            </div>
+
+                            <div className={"flex flex-col gap-3 sm:flex-row sm:justify-between"}>
+                                <button className={"button-base button-danger"} onClick={() => handleDelete()}>Delete game</button>
+                                <button className={"button-base button-primary"} onClick={() => setEdit(true)}>Edit entry</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     )
