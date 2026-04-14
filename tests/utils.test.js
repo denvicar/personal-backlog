@@ -108,9 +108,9 @@ describe('sortGames', () => {
 
 describe('getBacklogStats', () => {
     const games = [
-        {id: 1, title: 'Animal Well', status: status.COMPLETED, finish_date: '2024-05-12', genres: ['Puzzle', 'Metroidvania'], time_to_beat: [8.5]},
-        {id: 2, title: 'Balatro', status: status.COMPLETED, finish_date: '2024-02-24', genres: ['Card'], time_to_beat: [12]},
-        {id: 3, title: 'Celeste', status: status.COMPLETED, finish_date: '2025-01-01', genres: ['Platformer'], time_to_beat: []},
+        {id: 1, title: 'Animal Well', status: status.COMPLETED, finish_date: '2024-05-12', genres: ['Puzzle', 'Metroidvania'], time_to_beat: [8.5], score: 9},
+        {id: 2, title: 'Balatro', status: status.COMPLETED, finish_date: '2024-02-24', genres: ['Card'], time_to_beat: [12], score: 10},
+        {id: 3, title: 'Celeste', status: status.COMPLETED, finish_date: '2025-01-01', genres: ['Platformer'], time_to_beat: [], score: 7},
         {id: 4, title: 'Disco Elysium', status: status.PLANNED, finish_date: null, genres: ['RPG'], time_to_beat: [22]},
         {id: 5, title: 'Outer Wilds', status: status.PLANNED, finish_date: null, genres: ['Adventure'], time_to_beat: [16]},
         {id: 6, title: 'Portal', status: status.STARTED, finish_date: null, genres: ['Puzzle'], time_to_beat: [4]},
@@ -135,6 +135,11 @@ describe('getBacklogStats', () => {
         ])
         expect(stats.topGenre).toEqual({genre: 'Puzzle', count: 3})
         expect(stats.genreBreakdown[0]).toEqual({genre: 'Puzzle', count: 3})
+        expect(stats.ratingStats).toEqual({
+            averageRating: 8.7,
+            highestRated: {title: 'Balatro', score: 10},
+            lowestRated: {title: 'Celeste', score: 7},
+        })
     })
 
     it('returns up to five random planned games and only from planned entries', () => {
@@ -152,6 +157,11 @@ describe('getBacklogStats', () => {
         expect(stats.totalTimeSpentByYear).toEqual([])
         expect(stats.genreBreakdown).toEqual([])
         expect(stats.topGenre).toBeNull()
+        expect(stats.ratingStats).toEqual({
+            averageRating: null,
+            highestRated: null,
+            lowestRated: null,
+        })
         expect(stats.randomPlannedGames).toEqual([])
     })
 })

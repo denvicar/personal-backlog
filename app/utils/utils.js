@@ -159,6 +159,14 @@ export const sortGames = (games, sortState = defaultSortState) => {
 
 const sumMainHours = (games) => games.reduce((total, game) => total + (getHoursValue(game) ?? 0), 0)
 
+const getAssignedCompletedScore = (game) => {
+    if (game.status !== status.COMPLETED) return null
+    if (game.score === null || game.score === undefined) return null
+    const score = Number(game.score)
+    if (Number.isNaN(score) || score === 0) return null
+    return score
+}
+
 const groupByYear = (games, mapper, fieldName) => {
     const groups = new Map()
 
@@ -183,6 +191,11 @@ const groupByYear = (games, mapper, fieldName) => {
  *   totalTimeSpentByYear: Array<{ year: string, hours: number }>,
  *   genreBreakdown: Array<{ genre: string, count: number }>,
  *   topGenre: { genre: string, count: number } | null,
+ *   ratingStats: {
+ *     averageRating: number | null,
+ *     highestRated: { title: string, score: number } | null,
+ *     lowestRated: { title: string, score: number } | null
+ *   },
  *   randomPlannedGames: Array<Object>
  * }}
  */
@@ -190,6 +203,9 @@ export const getBacklogStats = (games, rng = Math.random) => {
     const completedGames = games.filter((game) => game.status === status.COMPLETED)
     const plannedGames = games.filter((game) => game.status === status.PLANNED)
     const gamesWithHours = games.filter((game) => getHoursValue(game) !== null)
+    const completedGamesWithAssignedScore = completedGames
+        .map((game) => ({game, score: getAssignedCompletedScore(game)}))
+        .filter((entry) => entry.score !== null)
 
     const genreCounts = new Map()
     for (const game of games) {
@@ -213,6 +229,17 @@ export const getBacklogStats = (games, rng = Math.random) => {
         shuffledPlanned[swapIndex] = current
     }
 
+    const sortedCompletedRatings = [...completedGamesWithAssignedScore].sort((left, right) => {
+        if (left.score !== right.score) return left.score - right.score
+        const titleCompare = compareStrings(left.game.title, right.game.title)
+        if (titleCompare !== 0) return titleCompare
+        return (left.game.id ?? 0) - (right.game.id ?? 0)
+    })
+
+    const averageRating = completedGamesWithAssignedScore.length > 0
+        ? Math.round((completedGamesWithAssignedScore.reduce((total, entry) => total + entry.score, 0) / completedGamesWithAssignedScore.length) * 10) / 10
+        : null
+
     return {
         summary: {
             totalGames: games.length,
@@ -232,6 +259,21 @@ export const getBacklogStats = (games, rng = Math.random) => {
         ),
         genreBreakdown,
         topGenre: genreBreakdown[0] ?? null,
+        ratingStats: {
+            averageRating,
+            highestRated: sortedCompletedRatings.length > 0
+                ? {
+                    title: sortedCompletedRatings[sortedCompletedRatings.length - 1].game.title,
+                    score: sortedCompletedRatings[sortedCompletedRatings.length - 1].score,
+                }
+                : null,
+            lowestRated: sortedCompletedRatings.length > 0
+                ? {
+                    title: sortedCompletedRatings[0].game.title,
+                    score: sortedCompletedRatings[0].score,
+                }
+                : null,
+        },
         randomPlannedGames: shuffledPlanned.slice(0, 5),
     }
 }

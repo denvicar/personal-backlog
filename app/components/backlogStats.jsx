@@ -128,6 +128,34 @@ export default function BacklogStats({games, user}) {
                                 valueKey={"count"}
                                 emptyLabel={"No genre data available."}
                             />
+
+                            <div className={"border-t border-[rgb(var(--border)/0.6)] pt-5"}>
+                                <p className={"eyebrow"}>Ratings</p>
+                                <h3 className={"mt-1 text-xl font-semibold"}>Completed game scores</h3>
+
+                                {stats.ratingStats.averageRating === null ? (
+                                    <p className={"muted mt-3 text-sm"}>No completed games with an assigned rating yet.</p>
+                                ) : (
+                                    <div className={"mt-4 grid gap-3"}>
+                                        <div className={"panel-strong px-4 py-4"}>
+                                            <p className={"eyebrow"}>Average Rating</p>
+                                            <p className={"mt-2 text-3xl font-semibold"}>{stats.ratingStats.averageRating}</p>
+                                        </div>
+                                        <div className={"grid gap-3 sm:grid-cols-2"}>
+                                            <div className={"panel-strong px-4 py-4"}>
+                                                <p className={"eyebrow"}>Highest Rating</p>
+                                                <p className={"mt-2 text-lg font-semibold"}>{stats.ratingStats.highestRated?.title}</p>
+                                                <p className={"muted mt-1 text-sm"}>{stats.ratingStats.highestRated?.score}</p>
+                                            </div>
+                                            <div className={"panel-strong px-4 py-4"}>
+                                                <p className={"eyebrow"}>Lowest Rating</p>
+                                                <p className={"mt-2 text-lg font-semibold"}>{stats.ratingStats.lowestRated?.title}</p>
+                                                <p className={"muted mt-1 text-sm"}>{stats.ratingStats.lowestRated?.score}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </section>
                 </div>

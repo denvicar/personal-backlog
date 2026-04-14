@@ -152,7 +152,7 @@ export default function GameList({games, user}) {
                         </div>
                     </section>
 
-                    <div className={"grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.9fr)]"}>
+                    <div className={"grid gap-5 xl:grid-cols-[minmax(0,1.82fr)_minmax(300px,0.72fr)]"}>
                         <section className={"panel min-h-[60vh] px-4 py-4 sm:px-5 sm:py-5"}>
                             <div className={"mb-4 flex flex-col gap-4"}>
                                 <div className={"flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"}>
@@ -188,7 +188,7 @@ export default function GameList({games, user}) {
                                 </div>
                             </div>
 
-                            <div className={"hidden rounded-2xl border border-[rgb(var(--border)/0.6)] bg-[rgb(var(--surface-strong)/0.75)] px-5 py-3 text-sm font-semibold text-[rgb(var(--muted))] lg:grid lg:grid-cols-[120px_minmax(0,1.5fr)_110px_120px_90px_110px] lg:gap-4"}>
+                            <div className={"hidden rounded-2xl border border-[rgb(var(--border)/0.6)] bg-[rgb(var(--surface-strong)/0.75)] px-4 py-3 text-sm font-semibold text-[rgb(var(--muted))] lg:grid lg:grid-cols-[112px_minmax(0,2.1fr)_100px_94px_72px_102px] lg:gap-3"}>
                                 <span>Cover</span>
                                 {sortOptions.map((option) => {
                                     const active = sortState.key === option.key
@@ -213,7 +213,7 @@ export default function GameList({games, user}) {
                                     <button
                                         onClick={() => handleRowClick(g.id)}
                                         key={g.id}
-                                        className={"panel-strong grid w-full gap-4 px-4 py-4 text-left transition duration-200 hover:-translate-y-0.5 hover:border-[rgb(var(--border-strong))] hover:shadow-lg lg:grid-cols-[120px_minmax(0,1.5fr)_110px_120px_90px_110px] lg:items-center"}
+                                        className={"panel-strong grid w-full gap-4 px-4 py-4 text-left transition duration-200 hover:-translate-y-0.5 hover:border-[rgb(var(--border-strong))] hover:shadow-lg lg:grid-cols-[112px_minmax(0,2.1fr)_100px_94px_72px_102px] lg:items-center lg:gap-3"}
                                     >
                                         <div className={"overflow-hidden rounded-2xl bg-[rgb(var(--background))]"}>
                                             {g.cover_url
@@ -222,7 +222,7 @@ export default function GameList({games, user}) {
                                         </div>
                                         <div className={"min-w-0 space-y-2"}>
                                             <div className={"flex flex-wrap items-center gap-2"}>
-                                                <h3 className={"max-w-full break-words text-xl font-semibold leading-tight whitespace-normal"}>{g.title}</h3>
+                                                <h3 className={"max-w-full break-words text-[1.9rem] font-semibold leading-[1.08] whitespace-normal"}>{g.title}</h3>
                                                 <span className={"muted text-sm"}>{getYear(g.release_date)}</span>
                                             </div>
                                             <p className={"muted line-clamp-2 text-sm"}>{g.summary || "No summary available."}</p>
