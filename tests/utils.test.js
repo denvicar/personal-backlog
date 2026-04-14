@@ -70,6 +70,16 @@ describe('sortGames', () => {
         expect(sortGames(games, defaultSortState).map((game) => game.id)).toEqual([1, 2, 3, 4])
     })
 
+    it('uses most recent start date as the first tie-breaker within the same status', () => {
+        const sameStatusGames = [
+            {id: 10, title: 'Older Start', start_date: '2024-01-01', status: status.STARTED, time_to_beat: [10], rating: 80, score: null},
+            {id: 11, title: 'No Start Date', start_date: null, status: status.STARTED, time_to_beat: [8], rating: 82, score: null},
+            {id: 12, title: 'Recent Start', start_date: '2024-03-01', status: status.STARTED, time_to_beat: [12], rating: 84, score: null},
+        ]
+
+        expect(sortGames(sameStatusGames, defaultSortState).map((game) => game.id)).toEqual([12, 10, 11])
+    })
+
     it('sorts titles case-insensitively in both directions', () => {
         expect(sortGames(games, {key: 'title', direction: 'asc'}).map((game) => game.id)).toEqual([2, 3, 4, 1])
         expect(sortGames(games, {key: 'title', direction: 'desc'}).map((game) => game.id)).toEqual([1, 3, 4, 2])

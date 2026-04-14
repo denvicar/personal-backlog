@@ -43,7 +43,7 @@ describe('BacklogStats', () => {
         )
 
         expect(screen.getByText('No completed games with a finish date yet.')).toBeInTheDocument()
-        expect(screen.getByText('No playtime data available for completed games.')).toBeInTheDocument()
+        expect(screen.getByText('Played hours are shown in parentheses when HLTB data is available for completed entries.')).toBeInTheDocument()
         expect(screen.getAllByText('No genre data available.').length).toBeGreaterThan(0)
         expect(screen.getByText('No planned games available.')).toBeInTheDocument()
     })

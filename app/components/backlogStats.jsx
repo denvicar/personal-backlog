@@ -10,7 +10,7 @@ const statusTone = {
     [status.DROPPED]: "bg-rose-200/75 text-rose-900 dark:bg-rose-950/45 dark:text-rose-100",
 }
 
-const BarList = ({items, labelKey, valueKey, emptyLabel, suffix = ''}) => {
+const BarList = ({items, labelKey, valueKey, emptyLabel, suffix = '', renderValue}) => {
     if (items.length === 0) {
         return <p className={"muted text-sm"}>{emptyLabel}</p>
     }
@@ -23,7 +23,7 @@ const BarList = ({items, labelKey, valueKey, emptyLabel, suffix = ''}) => {
                 <div key={item[labelKey]} className={"space-y-1.5"}>
                     <div className={"flex items-center justify-between gap-3 text-sm"}>
                         <span className={"font-semibold"}>{item[labelKey]}</span>
-                        <span className={"muted"}>{item[valueKey]}{suffix}</span>
+                        <span className={"muted"}>{renderValue ? renderValue(item) : `${item[valueKey]}${suffix}`}</span>
                     </div>
                     <div className={"h-2.5 rounded-full bg-[rgb(var(--background))]"}>
                         <div
@@ -37,8 +37,18 @@ const BarList = ({items, labelKey, valueKey, emptyLabel, suffix = ''}) => {
     )
 }
 
+const mergeYearlyStats = (completedByYear, hoursByYear) => {
+    const hourMap = new Map(hoursByYear.map((item) => [item.year, item.hours]))
+    return completedByYear.map((item) => ({
+        year: item.year,
+        count: item.count,
+        hours: hourMap.get(item.year) ?? 0,
+    }))
+}
+
 export default function BacklogStats({games, user}) {
     const stats = getBacklogStats(games)
+    const yearlyCompletionStats = mergeYearlyStats(stats.gamesCompletedByYear, stats.totalTimeSpentByYear)
 
     return (
         <main className={"app-shell"}>
@@ -81,32 +91,19 @@ export default function BacklogStats({games, user}) {
 
                 <div className={"grid gap-6 xl:grid-cols-[1.2fr_0.8fr]"}>
                     <section className={"panel px-5 py-5 sm:px-6"}>
-                        <div className={"grid gap-6 lg:grid-cols-2"}>
-                            <div className={"space-y-4"}>
-                                <div>
-                                    <p className={"eyebrow"}>Yearly Completions</p>
-                                    <h2 className={"mt-1 text-2xl font-semibold"}>Games completed by year</h2>
-                                </div>
-                                <BarList
-                                    items={stats.gamesCompletedByYear}
-                                    labelKey={"year"}
-                                    valueKey={"count"}
-                                    emptyLabel={"No completed games with a finish date yet."}
-                                />
+                        <div className={"space-y-4"}>
+                            <div>
+                                <p className={"eyebrow"}>Yearly Completions</p>
+                                <h2 className={"mt-1 text-2xl font-semibold"}>Games completed by year</h2>
+                                <p className={"muted mt-2 text-sm"}>Played hours are shown in parentheses when HLTB data is available for completed entries.</p>
                             </div>
-                            <div className={"space-y-4"}>
-                                <div>
-                                    <p className={"eyebrow"}>Yearly Hours</p>
-                                    <h2 className={"mt-1 text-2xl font-semibold"}>Total time spent by year</h2>
-                                </div>
-                                <BarList
-                                    items={stats.totalTimeSpentByYear}
-                                    labelKey={"year"}
-                                    valueKey={"hours"}
-                                    suffix={"h"}
-                                    emptyLabel={"No playtime data available for completed games."}
-                                />
-                            </div>
+                            <BarList
+                                items={yearlyCompletionStats}
+                                labelKey={"year"}
+                                valueKey={"count"}
+                                emptyLabel={"No completed games with a finish date yet."}
+                                renderValue={(item) => `${item.count} (${item.hours}h)`}
+                            />
                         </div>
                     </section>
 

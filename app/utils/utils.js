@@ -48,10 +48,25 @@ const getHoursValue = (game) => {
     return Number.isNaN(hours) ? null : hours
 }
 
+const compareTieBreakerDates = (left, right) => {
+    const leftDate = getDateValue(left.start_date)
+    const rightDate = getDateValue(right.start_date)
+    const leftMissing = leftDate === null
+    const rightMissing = rightDate === null
+
+    if (leftMissing && rightMissing) return 0
+    if (leftMissing) return 1
+    if (rightMissing) return -1
+    return rightDate - leftDate
+}
+
 const compareWithTieBreakers = (left, right, primaryCompare, direction) => {
     if (primaryCompare !== 0) {
         return direction === 'asc' ? primaryCompare : -primaryCompare
     }
+
+    const startDateCompare = compareTieBreakerDates(left, right)
+    if (startDateCompare !== 0) return startDateCompare
 
     const titleCompare = compareStrings(left.title, right.title)
     if (titleCompare !== 0) return titleCompare
