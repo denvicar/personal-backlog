@@ -263,7 +263,7 @@ export const getBacklogStats = (games, rng = Math.random) => {
         shuffledPlanned[swapIndex] = current
     }
 
-    const summarizeRatings = (entries) => {
+    const summarizeRatings = (entries, {ignoreZeroForLowest = false} = {}) => {
         const sorted = [...entries].sort((left, right) => {
             if (left.value !== right.value) return left.value - right.value
             const titleCompare = compareStrings(left.game.title, right.game.title)
@@ -275,20 +275,24 @@ export const getBacklogStats = (games, rng = Math.random) => {
             ? roundScore(sorted.reduce((total, entry) => total + entry.value, 0) / sorted.length)
             : null
 
+        const lowestCandidate = ignoreZeroForLowest
+            ? sorted.find((entry) => entry.value > 0) ?? null
+            : (sorted[0] ?? null)
+
         return {
             average,
             highest: sorted.length > 0
                 ? {title: sorted[sorted.length - 1].game.title, value: sorted[sorted.length - 1].value}
                 : null,
-            lowest: sorted.length > 0
-                ? {title: sorted[0].game.title, value: sorted[0].value}
+            lowest: lowestCandidate
+                ? {title: lowestCandidate.game.title, value: lowestCandidate.value}
                 : null,
         }
     }
 
     const scoreSummary = summarizeRatings(completedGamesWithAssignedScore)
-    const completedRatingSummary = summarizeRatings(completedGamesWithAssignedRating)
-    const backlogRatingSummary = summarizeRatings(backlogGamesWithAssignedRating)
+    const completedRatingSummary = summarizeRatings(completedGamesWithAssignedRating, {ignoreZeroForLowest: true})
+    const backlogRatingSummary = summarizeRatings(backlogGamesWithAssignedRating, {ignoreZeroForLowest: true})
 
     return {
         summary: {

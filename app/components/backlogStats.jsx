@@ -90,22 +90,55 @@ export default function BacklogStats({games, user}) {
                 </section>
 
                 <div className={"grid gap-6 xl:grid-cols-[1.2fr_0.8fr]"}>
-                    <section className={"panel px-5 py-5 sm:px-6"}>
-                        <div className={"space-y-4"}>
-                            <div>
-                                <p className={"eyebrow"}>Yearly Completions</p>
-                                <h2 className={"mt-1 text-2xl font-semibold"}>Games completed by year</h2>
-                                <p className={"muted mt-2 text-sm"}>Played hours are shown in parentheses when HLTB data is available for completed entries.</p>
+                    <div className={"space-y-6"}>
+                        <section className={"panel px-5 py-5 sm:px-6"}>
+                            <div className={"space-y-4"}>
+                                <div>
+                                    <p className={"eyebrow"}>Yearly Completions</p>
+                                    <h2 className={"mt-1 text-2xl font-semibold"}>Games completed by year</h2>
+                                    <p className={"muted mt-2 text-sm"}>Played hours are shown in parentheses when HLTB data is available for completed entries.</p>
+                                </div>
+                                <BarList
+                                    items={yearlyCompletionStats}
+                                    labelKey={"year"}
+                                    valueKey={"count"}
+                                    emptyLabel={"No completed games with a finish date yet."}
+                                    renderValue={(item) => `${item.count} (${item.hours}h)`}
+                                />
                             </div>
-                            <BarList
-                                items={yearlyCompletionStats}
-                                labelKey={"year"}
-                                valueKey={"count"}
-                                emptyLabel={"No completed games with a finish date yet."}
-                                renderValue={(item) => `${item.count} (${item.hours}h)`}
-                            />
-                        </div>
-                    </section>
+                        </section>
+
+                        <section className={"panel px-5 py-5 sm:px-6"}>
+                            <div className={"space-y-4"}>
+                                <div>
+                                    <p className={"eyebrow"}>Backlog Ratings</p>
+                                    <h2 className={"mt-1 text-2xl font-semibold"}>IGDB ratings across the full backlog</h2>
+                                </div>
+                                {stats.backlogRatingStats.averageRating === null ? (
+                                    <p className={"muted text-sm"}>No backlog games with an IGDB rating yet.</p>
+                                ) : (
+                                    <div className={"grid gap-3"}>
+                                        <div className={"panel-strong px-4 py-4"}>
+                                            <p className={"eyebrow"}>Average Rating</p>
+                                            <p className={"mt-2 text-3xl font-semibold"}>{stats.backlogRatingStats.averageRating}</p>
+                                        </div>
+                                        <div className={"grid gap-3 sm:grid-cols-2"}>
+                                            <div className={"panel-strong px-4 py-4"}>
+                                                <p className={"eyebrow"}>Highest Rating</p>
+                                                <p className={"mt-2 text-lg font-semibold"}>{stats.backlogRatingStats.highestRating?.title}</p>
+                                                <p className={"muted mt-1 text-sm"}>{stats.backlogRatingStats.highestRating?.value}</p>
+                                            </div>
+                                            <div className={"panel-strong px-4 py-4"}>
+                                                <p className={"eyebrow"}>Lowest Rating</p>
+                                                <p className={"mt-2 text-lg font-semibold"}>{stats.backlogRatingStats.lowestRating?.title}</p>
+                                                <p className={"muted mt-1 text-sm"}>{stats.backlogRatingStats.lowestRating?.value}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+                    </div>
 
                     <section className={"panel px-5 py-5 sm:px-6"}>
                         <div className={"space-y-5"}>
@@ -182,33 +215,6 @@ export default function BacklogStats({games, user}) {
                                                         <p className={"eyebrow"}>Lowest Rating</p>
                                                         <p className={"mt-2 text-lg font-semibold"}>{stats.completedRatingStats.lowestRating?.title}</p>
                                                         <p className={"muted mt-1 text-sm"}>{stats.completedRatingStats.lowestRating?.value}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className={"panel-strong px-4 py-4"}>
-                                        <p className={"eyebrow"}>Backlog Ratings</p>
-                                        <h4 className={"mt-1 text-lg font-semibold"}>IGDB ratings across the full backlog</h4>
-                                        {stats.backlogRatingStats.averageRating === null ? (
-                                            <p className={"muted mt-3 text-sm"}>No backlog games with an IGDB rating yet.</p>
-                                        ) : (
-                                            <div className={"mt-4 grid gap-3"}>
-                                                <div>
-                                                    <p className={"eyebrow"}>Average Rating</p>
-                                                    <p className={"mt-2 text-3xl font-semibold"}>{stats.backlogRatingStats.averageRating}</p>
-                                                </div>
-                                                <div className={"grid gap-3 sm:grid-cols-2"}>
-                                                    <div>
-                                                        <p className={"eyebrow"}>Highest Rating</p>
-                                                        <p className={"mt-2 text-lg font-semibold"}>{stats.backlogRatingStats.highestRating?.title}</p>
-                                                        <p className={"muted mt-1 text-sm"}>{stats.backlogRatingStats.highestRating?.value}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className={"eyebrow"}>Lowest Rating</p>
-                                                        <p className={"mt-2 text-lg font-semibold"}>{stats.backlogRatingStats.lowestRating?.title}</p>
-                                                        <p className={"muted mt-1 text-sm"}>{stats.backlogRatingStats.lowestRating?.value}</p>
                                                     </div>
                                                 </div>
                                             </div>

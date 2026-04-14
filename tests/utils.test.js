@@ -160,6 +160,17 @@ describe('getBacklogStats', () => {
         expect(stats.randomPlannedGames.every((game) => game.status === status.PLANNED)).toBe(true)
     })
 
+    it('ignores zero-valued ratings when selecting the lowest rated game', () => {
+        const stats = getBacklogStats([
+            {id: 1, title: 'Zero Rated', status: status.COMPLETED, finish_date: '2024-01-01', genres: [], time_to_beat: [], rating: 0},
+            {id: 2, title: 'Actual Low', status: status.COMPLETED, finish_date: '2024-01-02', genres: [], time_to_beat: [], rating: 72.4},
+            {id: 3, title: 'Higher', status: status.PLANNED, finish_date: null, genres: [], time_to_beat: [], rating: 85.1},
+        ], () => 0)
+
+        expect(stats.completedRatingStats.lowestRating).toEqual({title: 'Actual Low', value: 72.4})
+        expect(stats.backlogRatingStats.lowestRating).toEqual({title: 'Actual Low', value: 72.4})
+    })
+
     it('returns empty contracts for missing completed, planned, and genre data', () => {
         const stats = getBacklogStats([{id: 99, title: 'Unknown', status: status.STARTED, genres: [], time_to_beat: []}], () => 0)
 
