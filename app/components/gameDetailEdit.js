@@ -20,16 +20,16 @@ export default function GameDetailEdit({game, setGame, handleClose, handleEdit, 
         let updatedGame = game
         switch (e.target.value) {
             case status.STARTED:
-                updatedGame = {...game, finish_date: '', score: 0, start_date: getDateStringFromDB(Date.now()), status: e.target.value}
+                updatedGame = {...game, finish_date: '', score: null, start_date: getDateStringFromDB(Date.now()), status: e.target.value}
                 break
             case status.COMPLETED:
                 updatedGame = {...game, finish_date: getDateStringFromDB(Date.now()), status: e.target.value}
                 break
             case status.PLANNED:
-                updatedGame = {...game, start_date: '', finish_date: '', score: 0, status: e.target.value}
+                updatedGame = {...game, start_date: '', finish_date: '', score: null, status: e.target.value}
                 break
             case status.DROPPED:
-                updatedGame = {...game, finish_date: '', status: e.target.value}
+                updatedGame = {...game, finish_date: '', score: null, status: e.target.value}
                 break
         }
         setGame(updatedGame)
@@ -109,7 +109,7 @@ export default function GameDetailEdit({game, setGame, handleClose, handleEdit, 
                                 {game.status === status.COMPLETED && (
                                     <label className={"block"}>
                                         <span className={"mb-2 block text-sm font-semibold"}>Score</span>
-                                        <input type={"number"} className={"input-base"} value={game.score} onChange={(e) => setGame({...game, score: e.target.value})} />
+                                        <input type={"number"} min={"0"} max={"100"} step={"1"} className={"input-base"} value={game.score ?? ''} onChange={(e) => setGame({...game, score: e.target.value})} />
                                     </label>
                                 )}
 

@@ -40,7 +40,7 @@ describe('utils', () => {
         })).toEqual({
             start_date: null,
             finish_date: null,
-            score: null,
+            score: 0,
             comments: 'note',
         })
     })
@@ -101,19 +101,19 @@ describe('sortGames', () => {
     })
 
     it('sorts by user score first, then critic rating, with deterministic tie-breakers', () => {
-        expect(sortGames(games, {key: 'rating_score', direction: 'asc'}).map((game) => game.id)).toEqual([3, 4, 1, 2])
-        expect(sortGames(games, {key: 'rating_score', direction: 'desc'}).map((game) => game.id)).toEqual([2, 1, 4, 3])
+        expect(sortGames(games, {key: 'rating_score', direction: 'asc'}).map((game) => game.id)).toEqual([4, 3, 1, 2])
+        expect(sortGames(games, {key: 'rating_score', direction: 'desc'}).map((game) => game.id)).toEqual([2, 1, 3, 4])
     })
 })
 
 describe('getBacklogStats', () => {
     const games = [
-        {id: 1, title: 'Animal Well', status: status.COMPLETED, finish_date: '2024-05-12', genres: ['Puzzle', 'Metroidvania'], time_to_beat: [8.5], score: 9},
-        {id: 2, title: 'Balatro', status: status.COMPLETED, finish_date: '2024-02-24', genres: ['Card'], time_to_beat: [12], score: 10},
-        {id: 3, title: 'Celeste', status: status.COMPLETED, finish_date: '2025-01-01', genres: ['Platformer'], time_to_beat: [], score: 7},
-        {id: 4, title: 'Disco Elysium', status: status.PLANNED, finish_date: null, genres: ['RPG'], time_to_beat: [22]},
-        {id: 5, title: 'Outer Wilds', status: status.PLANNED, finish_date: null, genres: ['Adventure'], time_to_beat: [16]},
-        {id: 6, title: 'Portal', status: status.STARTED, finish_date: null, genres: ['Puzzle'], time_to_beat: [4]},
+        {id: 1, title: 'Animal Well', status: status.COMPLETED, finish_date: '2024-05-12', genres: ['Puzzle', 'Metroidvania'], time_to_beat: [8.5], score: 90, rating: 91.2},
+        {id: 2, title: 'Balatro', status: status.COMPLETED, finish_date: '2024-02-24', genres: ['Card'], time_to_beat: [12], score: 100, rating: 96.4},
+        {id: 3, title: 'Celeste', status: status.COMPLETED, finish_date: '2025-01-01', genres: ['Platformer'], time_to_beat: [], score: 70, rating: 88.3},
+        {id: 4, title: 'Disco Elysium', status: status.PLANNED, finish_date: null, genres: ['RPG'], time_to_beat: [22], rating: 97.1},
+        {id: 5, title: 'Outer Wilds', status: status.PLANNED, finish_date: null, genres: ['Adventure'], time_to_beat: [16], rating: 89.6},
+        {id: 6, title: 'Portal', status: status.STARTED, finish_date: null, genres: ['Puzzle'], time_to_beat: [4], rating: 90.5},
         {id: 7, title: 'Return of the Obra Dinn', status: status.PLANNED, finish_date: null, genres: ['Puzzle'], time_to_beat: [9]},
     ]
 
@@ -135,10 +135,20 @@ describe('getBacklogStats', () => {
         ])
         expect(stats.topGenre).toEqual({genre: 'Puzzle', count: 3})
         expect(stats.genreBreakdown[0]).toEqual({genre: 'Puzzle', count: 3})
-        expect(stats.ratingStats).toEqual({
-            averageRating: 8.7,
-            highestRated: {title: 'Balatro', score: 10},
-            lowestRated: {title: 'Celeste', score: 7},
+        expect(stats.scoreStats).toEqual({
+            averageScore: 86.7,
+            highestScore: {title: 'Balatro', value: 100},
+            lowestScore: {title: 'Celeste', value: 70},
+        })
+        expect(stats.completedRatingStats).toEqual({
+            averageRating: 92,
+            highestRating: {title: 'Balatro', value: 96.4},
+            lowestRating: {title: 'Celeste', value: 88.3},
+        })
+        expect(stats.backlogRatingStats).toEqual({
+            averageRating: 92.2,
+            highestRating: {title: 'Disco Elysium', value: 97.1},
+            lowestRating: {title: 'Celeste', value: 88.3},
         })
     })
 
@@ -157,10 +167,20 @@ describe('getBacklogStats', () => {
         expect(stats.totalTimeSpentByYear).toEqual([])
         expect(stats.genreBreakdown).toEqual([])
         expect(stats.topGenre).toBeNull()
-        expect(stats.ratingStats).toEqual({
+        expect(stats.scoreStats).toEqual({
+            averageScore: null,
+            highestScore: null,
+            lowestScore: null,
+        })
+        expect(stats.completedRatingStats).toEqual({
             averageRating: null,
-            highestRated: null,
-            lowestRated: null,
+            highestRating: null,
+            lowestRating: null,
+        })
+        expect(stats.backlogRatingStats).toEqual({
+            averageRating: null,
+            highestRating: null,
+            lowestRating: null,
         })
         expect(stats.randomPlannedGames).toEqual([])
     })

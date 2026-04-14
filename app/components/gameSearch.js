@@ -84,6 +84,9 @@ export default function GameSearch({searchResult, handleAdd, search, filter, set
                             <span className={"mb-2 block text-sm font-semibold"}>Score</span>
                             <input
                                 type={"number"}
+                                min={"0"}
+                                max={"100"}
+                                step={"1"}
                                 className={"input-base"}
                                 placeholder={"8"}
                                 value={game.score ? game.score : ''}

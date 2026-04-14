@@ -12,6 +12,8 @@ const statusOrder = {
     [status.DROPPED]: 3
 }
 
+const roundScore = (value) => Math.round(value * 10) / 10
+
 const normalizeString = (value) => (value ?? '').toString().trim().toLowerCase()
 
 const compareStrings = (left, right) => normalizeString(left).localeCompare(normalizeString(right))
@@ -26,12 +28,26 @@ const compareNullableNumber = (left, right) => {
     return left - right
 }
 
-const getPrimaryScore = (game) => {
-    if (game.score !== null && game.score !== undefined && Number(game.score) !== 0) {
-        return Number(game.score)
+const parseNumericValue = (value, {nullIfMissing = false} = {}) => {
+    if (value === null || value === undefined || value === '') {
+        return nullIfMissing ? null : 0
     }
-    if (game.rating !== null && game.rating !== undefined) {
-        return Number(game.rating)
+
+    const parsed = Number(value)
+    if (Number.isNaN(parsed)) {
+        return nullIfMissing ? null : 0
+    }
+    return parsed
+}
+
+const getPrimaryScore = (game) => {
+    const userScore = parseNumericValue(game.score, {nullIfMissing: true})
+    if (userScore !== null) {
+        return userScore
+    }
+    const rating = parseNumericValue(game.rating, {nullIfMissing: true})
+    if (rating !== null) {
+        return rating
     }
     return 0
 }
@@ -97,7 +113,7 @@ export const mapValuesForInput = (game) => {
     return {...game,
         start_date: game.start_date !== null ? game.start_date : '',
         finish_date: game.finish_date !== null ? game.finish_date : '',
-        score: game.score !== null ? game.score : 0
+        score: game.score !== null ? parseNumericValue(game.score) : 0
     }
 }
 
@@ -105,7 +121,7 @@ export const mapValuesForDB = (game) => {
     return {...game,
         start_date: game.start_date !== '' ? game.start_date : null,
         finish_date: game.finish_date !== '' ? game.finish_date : null,
-        score: game.score !== 0 ? game.score : null
+        score: game.score !== '' && game.score !== null && game.score !== undefined ? parseNumericValue(game.score, {nullIfMissing: true}) : null
     }
 }
 
@@ -159,12 +175,14 @@ export const sortGames = (games, sortState = defaultSortState) => {
 
 const sumMainHours = (games) => games.reduce((total, game) => total + (getHoursValue(game) ?? 0), 0)
 
-const getAssignedCompletedScore = (game) => {
-    if (game.status !== status.COMPLETED) return null
-    if (game.score === null || game.score === undefined) return null
-    const score = Number(game.score)
-    if (Number.isNaN(score) || score === 0) return null
-    return score
+const getAssignedCompletedScore = (game, scope = 'completed') => {
+    if (scope === 'completed' && game.status !== status.COMPLETED) return null
+    return parseNumericValue(game.score, {nullIfMissing: true})
+}
+
+const getAssignedRating = (game, scope = 'completed') => {
+    if (scope === 'completed' && game.status !== status.COMPLETED) return null
+    return parseNumericValue(game.rating, {nullIfMissing: true})
 }
 
 const groupByYear = (games, mapper, fieldName) => {
@@ -191,10 +209,20 @@ const groupByYear = (games, mapper, fieldName) => {
  *   totalTimeSpentByYear: Array<{ year: string, hours: number }>,
  *   genreBreakdown: Array<{ genre: string, count: number }>,
  *   topGenre: { genre: string, count: number } | null,
- *   ratingStats: {
+ *   scoreStats: {
+ *     averageScore: number | null,
+ *     highestScore: { title: string, value: number } | null,
+ *     lowestScore: { title: string, value: number } | null
+ *   },
+ *   completedRatingStats: {
  *     averageRating: number | null,
- *     highestRated: { title: string, score: number } | null,
- *     lowestRated: { title: string, score: number } | null
+ *     highestRating: { title: string, value: number } | null,
+ *     lowestRating: { title: string, value: number } | null
+ *   },
+ *   backlogRatingStats: {
+ *     averageRating: number | null,
+ *     highestRating: { title: string, value: number } | null,
+ *     lowestRating: { title: string, value: number } | null
  *   },
  *   randomPlannedGames: Array<Object>
  * }}
@@ -204,8 +232,14 @@ export const getBacklogStats = (games, rng = Math.random) => {
     const plannedGames = games.filter((game) => game.status === status.PLANNED)
     const gamesWithHours = games.filter((game) => getHoursValue(game) !== null)
     const completedGamesWithAssignedScore = completedGames
-        .map((game) => ({game, score: getAssignedCompletedScore(game)}))
-        .filter((entry) => entry.score !== null)
+        .map((game) => ({game, value: getAssignedCompletedScore(game)}))
+        .filter((entry) => entry.value !== null)
+    const completedGamesWithAssignedRating = completedGames
+        .map((game) => ({game, value: getAssignedRating(game)}))
+        .filter((entry) => entry.value !== null)
+    const backlogGamesWithAssignedRating = games
+        .map((game) => ({game, value: getAssignedRating(game, 'backlog')}))
+        .filter((entry) => entry.value !== null)
 
     const genreCounts = new Map()
     for (const game of games) {
@@ -229,16 +263,32 @@ export const getBacklogStats = (games, rng = Math.random) => {
         shuffledPlanned[swapIndex] = current
     }
 
-    const sortedCompletedRatings = [...completedGamesWithAssignedScore].sort((left, right) => {
-        if (left.score !== right.score) return left.score - right.score
-        const titleCompare = compareStrings(left.game.title, right.game.title)
-        if (titleCompare !== 0) return titleCompare
-        return (left.game.id ?? 0) - (right.game.id ?? 0)
-    })
+    const summarizeRatings = (entries) => {
+        const sorted = [...entries].sort((left, right) => {
+            if (left.value !== right.value) return left.value - right.value
+            const titleCompare = compareStrings(left.game.title, right.game.title)
+            if (titleCompare !== 0) return titleCompare
+            return (left.game.id ?? 0) - (right.game.id ?? 0)
+        })
 
-    const averageRating = completedGamesWithAssignedScore.length > 0
-        ? Math.round((completedGamesWithAssignedScore.reduce((total, entry) => total + entry.score, 0) / completedGamesWithAssignedScore.length) * 10) / 10
-        : null
+        const average = sorted.length > 0
+            ? roundScore(sorted.reduce((total, entry) => total + entry.value, 0) / sorted.length)
+            : null
+
+        return {
+            average,
+            highest: sorted.length > 0
+                ? {title: sorted[sorted.length - 1].game.title, value: sorted[sorted.length - 1].value}
+                : null,
+            lowest: sorted.length > 0
+                ? {title: sorted[0].game.title, value: sorted[0].value}
+                : null,
+        }
+    }
+
+    const scoreSummary = summarizeRatings(completedGamesWithAssignedScore)
+    const completedRatingSummary = summarizeRatings(completedGamesWithAssignedRating)
+    const backlogRatingSummary = summarizeRatings(backlogGamesWithAssignedRating)
 
     return {
         summary: {
@@ -259,20 +309,20 @@ export const getBacklogStats = (games, rng = Math.random) => {
         ),
         genreBreakdown,
         topGenre: genreBreakdown[0] ?? null,
-        ratingStats: {
-            averageRating,
-            highestRated: sortedCompletedRatings.length > 0
-                ? {
-                    title: sortedCompletedRatings[sortedCompletedRatings.length - 1].game.title,
-                    score: sortedCompletedRatings[sortedCompletedRatings.length - 1].score,
-                }
-                : null,
-            lowestRated: sortedCompletedRatings.length > 0
-                ? {
-                    title: sortedCompletedRatings[0].game.title,
-                    score: sortedCompletedRatings[0].score,
-                }
-                : null,
+        scoreStats: {
+            averageScore: scoreSummary.average,
+            highestScore: scoreSummary.highest,
+            lowestScore: scoreSummary.lowest,
+        },
+        completedRatingStats: {
+            averageRating: completedRatingSummary.average,
+            highestRating: completedRatingSummary.highest,
+            lowestRating: completedRatingSummary.lowest,
+        },
+        backlogRatingStats: {
+            averageRating: backlogRatingSummary.average,
+            highestRating: backlogRatingSummary.highest,
+            lowestRating: backlogRatingSummary.lowest,
         },
         randomPlannedGames: shuffledPlanned.slice(0, 5),
     }

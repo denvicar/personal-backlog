@@ -131,30 +131,90 @@ export default function BacklogStats({games, user}) {
 
                             <div className={"border-t border-[rgb(var(--border)/0.6)] pt-5"}>
                                 <p className={"eyebrow"}>Ratings</p>
-                                <h3 className={"mt-1 text-xl font-semibold"}>Completed game scores</h3>
+                                <h3 className={"mt-1 text-xl font-semibold"}>Score and rating breakdown</h3>
 
-                                {stats.ratingStats.averageRating === null ? (
-                                    <p className={"muted mt-3 text-sm"}>No completed games with an assigned rating yet.</p>
-                                ) : (
-                                    <div className={"mt-4 grid gap-3"}>
-                                        <div className={"panel-strong px-4 py-4"}>
-                                            <p className={"eyebrow"}>Average Rating</p>
-                                            <p className={"mt-2 text-3xl font-semibold"}>{stats.ratingStats.averageRating}</p>
-                                        </div>
-                                        <div className={"grid gap-3 sm:grid-cols-2"}>
-                                            <div className={"panel-strong px-4 py-4"}>
-                                                <p className={"eyebrow"}>Highest Rating</p>
-                                                <p className={"mt-2 text-lg font-semibold"}>{stats.ratingStats.highestRated?.title}</p>
-                                                <p className={"muted mt-1 text-sm"}>{stats.ratingStats.highestRated?.score}</p>
+                                <div className={"mt-4 grid gap-4"}>
+                                    <div className={"panel-strong px-4 py-4"}>
+                                        <p className={"eyebrow"}>Completed Scores</p>
+                                        <h4 className={"mt-1 text-lg font-semibold"}>Assigned user scores on completed games</h4>
+                                        {stats.scoreStats.averageScore === null ? (
+                                            <p className={"muted mt-3 text-sm"}>No completed games with an assigned score yet.</p>
+                                        ) : (
+                                            <div className={"mt-4 grid gap-3"}>
+                                                <div>
+                                                    <p className={"eyebrow"}>Average Score</p>
+                                                    <p className={"mt-2 text-3xl font-semibold"}>{stats.scoreStats.averageScore}</p>
+                                                </div>
+                                                <div className={"grid gap-3 sm:grid-cols-2"}>
+                                                    <div>
+                                                        <p className={"eyebrow"}>Highest Score</p>
+                                                        <p className={"mt-2 text-lg font-semibold"}>{stats.scoreStats.highestScore?.title}</p>
+                                                        <p className={"muted mt-1 text-sm"}>{stats.scoreStats.highestScore?.value}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className={"eyebrow"}>Lowest Score</p>
+                                                        <p className={"mt-2 text-lg font-semibold"}>{stats.scoreStats.lowestScore?.title}</p>
+                                                        <p className={"muted mt-1 text-sm"}>{stats.scoreStats.lowestScore?.value}</p>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className={"panel-strong px-4 py-4"}>
-                                                <p className={"eyebrow"}>Lowest Rating</p>
-                                                <p className={"mt-2 text-lg font-semibold"}>{stats.ratingStats.lowestRated?.title}</p>
-                                                <p className={"muted mt-1 text-sm"}>{stats.ratingStats.lowestRated?.score}</p>
-                                            </div>
-                                        </div>
+                                        )}
                                     </div>
-                                )}
+
+                                    <div className={"panel-strong px-4 py-4"}>
+                                        <p className={"eyebrow"}>Completed Ratings</p>
+                                        <h4 className={"mt-1 text-lg font-semibold"}>IGDB ratings for completed games</h4>
+                                        {stats.completedRatingStats.averageRating === null ? (
+                                            <p className={"muted mt-3 text-sm"}>No completed games with an IGDB rating yet.</p>
+                                        ) : (
+                                            <div className={"mt-4 grid gap-3"}>
+                                                <div>
+                                                    <p className={"eyebrow"}>Average Rating</p>
+                                                    <p className={"mt-2 text-3xl font-semibold"}>{stats.completedRatingStats.averageRating}</p>
+                                                </div>
+                                                <div className={"grid gap-3 sm:grid-cols-2"}>
+                                                    <div>
+                                                        <p className={"eyebrow"}>Highest Rating</p>
+                                                        <p className={"mt-2 text-lg font-semibold"}>{stats.completedRatingStats.highestRating?.title}</p>
+                                                        <p className={"muted mt-1 text-sm"}>{stats.completedRatingStats.highestRating?.value}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className={"eyebrow"}>Lowest Rating</p>
+                                                        <p className={"mt-2 text-lg font-semibold"}>{stats.completedRatingStats.lowestRating?.title}</p>
+                                                        <p className={"muted mt-1 text-sm"}>{stats.completedRatingStats.lowestRating?.value}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className={"panel-strong px-4 py-4"}>
+                                        <p className={"eyebrow"}>Backlog Ratings</p>
+                                        <h4 className={"mt-1 text-lg font-semibold"}>IGDB ratings across the full backlog</h4>
+                                        {stats.backlogRatingStats.averageRating === null ? (
+                                            <p className={"muted mt-3 text-sm"}>No backlog games with an IGDB rating yet.</p>
+                                        ) : (
+                                            <div className={"mt-4 grid gap-3"}>
+                                                <div>
+                                                    <p className={"eyebrow"}>Average Rating</p>
+                                                    <p className={"mt-2 text-3xl font-semibold"}>{stats.backlogRatingStats.averageRating}</p>
+                                                </div>
+                                                <div className={"grid gap-3 sm:grid-cols-2"}>
+                                                    <div>
+                                                        <p className={"eyebrow"}>Highest Rating</p>
+                                                        <p className={"mt-2 text-lg font-semibold"}>{stats.backlogRatingStats.highestRating?.title}</p>
+                                                        <p className={"muted mt-1 text-sm"}>{stats.backlogRatingStats.highestRating?.value}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className={"eyebrow"}>Lowest Rating</p>
+                                                        <p className={"mt-2 text-lg font-semibold"}>{stats.backlogRatingStats.lowestRating?.title}</p>
+                                                        <p className={"muted mt-1 text-sm"}>{stats.backlogRatingStats.lowestRating?.value}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </section>

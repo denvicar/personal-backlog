@@ -2,6 +2,7 @@
 import {sql} from "@vercel/postgres";
 import {unstable_noStore} from "next/cache";
 import { HltbService } from "../lib/hltb/hltbService";
+import {mapValuesForDB} from "@/app/utils/utils";
 
 const base_url = 'https://api.igdb.com/v4'
 const auth_url = 'https://id.twitch.tv/oauth2/token?'
@@ -96,10 +97,11 @@ export async function searchGame(game) {
 export async function insertGame(game) {
     try {
         unstable_noStore()
+        const valuesForDb = mapValuesForDB(game)
         await sql`INSERT INTO "Games"(title, igdb_id, cover_url, score, rating, summary, comments, genres, platforms, release_date, start_date, finish_date, status, "user", time_to_beat)
-                VALUES (${game.title}, ${game.igdb_id}, ${game.cover_url}, ${game.score}, ${game.rating}, ${game.summary}, ${game.comments}, 
-                ${game.genres}, ${game.platforms}, ${game.release_date}, ${game.start_date}, ${game.finish_date}, ${game.status}, ${game.user},
-                ${game.time_to_beat});`
+                VALUES (${valuesForDb.title}, ${valuesForDb.igdb_id}, ${valuesForDb.cover_url}, ${valuesForDb.score}, ${valuesForDb.rating}, ${valuesForDb.summary}, ${valuesForDb.comments}, 
+                ${valuesForDb.genres}, ${valuesForDb.platforms}, ${valuesForDb.release_date}, ${valuesForDb.start_date}, ${valuesForDb.finish_date}, ${valuesForDb.status}, ${valuesForDb.user},
+                ${valuesForDb.time_to_beat});`
 
         const res = await sql`select * from "Games" where igdb_id=${game.igdb_id}`
         return formatDbData(res.rows)[0]
@@ -129,9 +131,10 @@ export async function addGame(game) {
 
 export async function updateGame(game) {
     try {
+        const valuesForDb = mapValuesForDB(game)
         await sql`UPDATE "Games"
-                SET score=${game.score}, comments=${game.comments}, start_date=${game.start_date}, finish_date=${game.finish_date}, status=${game.status}
-                WHERE id=${game.id};`
+                SET score=${valuesForDb.score}, comments=${valuesForDb.comments}, start_date=${valuesForDb.start_date}, finish_date=${valuesForDb.finish_date}, status=${valuesForDb.status}
+                WHERE id=${valuesForDb.id};`
         return {status:200,message:'Updated game'}
     } catch (error) {
         return {status:500,message:'Database error'}
