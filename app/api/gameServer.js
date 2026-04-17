@@ -6,6 +6,7 @@ import {mapValuesForDB} from "@/app/utils/utils";
 
 const base_url = 'https://api.igdb.com/v4'
 const auth_url = 'https://id.twitch.tv/oauth2/token?'
+const baseGameCategories = new Set([0, 8, 9, 10, 11])
 
 let access_token = process.env.IGDB_TOKEN
 let headers = {
@@ -25,8 +26,64 @@ const authenticate = async () => {
     headers = {...headers, 'Authorization': `Bearer ${access_token}`}
 }
 
-const requested_fields = 'fields id,aggregated_rating,cover.url,first_release_date,genres.name,name,platforms.name,summary'
+const requested_fields = 'fields id,aggregated_rating,category,cover.url,first_release_date,genres.name,name,parent_game,platforms.name,summary,version_parent'
 const hltbService = new HltbService()
+
+const normalizeSearchTerm = (value) => {
+    if (!value) return ''
+    return value
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+}
+
+const escapeIgdbSearchString = (value) => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+
+const rankSearchResult = (result, query) => {
+    const normalizedQuery = normalizeSearchTerm(query)
+    const normalizedName = normalizeSearchTerm(result?.name)
+    const queryTerms = normalizedQuery.split(' ').filter(Boolean)
+    const exactMatch = normalizedName === normalizedQuery
+    const startsWithQuery = normalizedName.startsWith(normalizedQuery)
+    const containsQuery = normalizedQuery !== '' && normalizedName.includes(normalizedQuery)
+    const containsAllTerms = queryTerms.length > 0 && queryTerms.every((term) => normalizedName.includes(term))
+    const baseNameLength = normalizedName.length || Number.MAX_SAFE_INTEGER
+    const isPrimaryRelease = baseGameCategories.has(result?.category) && !result?.parent_game && !result?.version_parent
+
+    let score = 0
+
+    if (exactMatch) score -= 1000
+    else if (startsWithQuery) score -= 400
+    else if (containsQuery) score -= 250
+    else if (containsAllTerms) score -= 100
+
+    if (isPrimaryRelease) score -= 75
+    if (result?.parent_game || result?.version_parent) score += 120
+    if (result?.category !== undefined && !baseGameCategories.has(result.category)) score += 40
+
+    score += baseNameLength / 1000
+
+    return score
+}
+
+const prioritizeSearchResults = (results, query) => {
+    return [...results].sort((left, right) => {
+        const leftRank = rankSearchResult(left, query)
+        const rightRank = rankSearchResult(right, query)
+
+        if (leftRank !== rightRank) return leftRank - rightRank
+
+        const leftName = left?.name ?? ''
+        const rightName = right?.name ?? ''
+        const nameComparison = leftName.localeCompare(rightName)
+        if (nameComparison !== 0) return nameComparison
+
+        return (left?.id ?? 0) - (right?.id ?? 0)
+    })
+}
+
 const formatDbData = (json) => {
     return json.map(item => {
         let mapped = {}
@@ -83,7 +140,7 @@ export async function searchGame(game) {
     const res = await fetch(`${base_url}/games`, {
         method: 'POST',
         headers: headers,
-        body: `${requested_fields}; search "${game}";`
+        body: `${requested_fields}; search "${escapeIgdbSearchString(game)}"; limit 20;`
     })
     let data = await res.json();
     if (data.message && data.message.startsWith('Authorization')) {
@@ -91,7 +148,7 @@ export async function searchGame(game) {
         return searchGame(game)
     }
 
-    return data;
+    return Array.isArray(data) ? prioritizeSearchResults(data, game) : data;
 }
 
 export async function insertGame(game) {

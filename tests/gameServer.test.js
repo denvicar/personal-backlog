@@ -54,6 +54,28 @@ describe('gameServer', () => {
         expect(global.fetch.mock.calls[2][1].body).toContain('search "Balatro"')
     })
 
+    it('prioritizes exact base-game matches ahead of DLC-style fuzzy results', async () => {
+        global.fetch.mockResolvedValue({
+            json: async () => ([
+                {id: 1, name: 'Persona 3 Reload: Background Music Set', category: 1, parent_game: 90},
+                {id: 2, name: 'Persona 3 Reload', category: 0},
+                {id: 3, name: 'Persona 3 Reload Digital Artbook', category: 1, parent_game: 90},
+                {id: 4, name: 'Persona 3 Reload: Expansion Pass', category: 1, parent_game: 90},
+            ]),
+        })
+
+        const {searchGame} = await loadModule()
+        const result = await searchGame('Persona 3 Reload')
+
+        expect(result.map((entry) => entry.name)).toEqual([
+            'Persona 3 Reload',
+            'Persona 3 Reload: Expansion Pass',
+            'Persona 3 Reload Digital Artbook',
+            'Persona 3 Reload: Background Music Set',
+        ])
+        expect(global.fetch.mock.calls[0][1].body).toContain('limit 20')
+    })
+
     it('adds a game with HLTB timings and persists it through sql', async () => {
         searchSpy.mockResolvedValue([
             {
