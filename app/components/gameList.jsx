@@ -79,8 +79,15 @@ export default function GameList({games, user}) {
             comments: game.comments,
             user: user.name
         }
-        addGame(newGame)
-            .then(res => setDisplayedGames([...displayedGames, res]))
+        try {
+            const res = await addGame(newGame)
+            if (!res || res.status >= 400 || !res.id) {
+                return
+            }
+            setDisplayedGames((currentGames) => [...currentGames, res])
+        } catch (_error) {
+            return
+        }
     }
 
     const handleRowClick = (id) => {

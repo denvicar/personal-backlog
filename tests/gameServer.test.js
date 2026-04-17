@@ -26,6 +26,7 @@ describe('gameServer', () => {
     beforeEach(() => {
         vi.resetModules()
         vi.clearAllMocks()
+        vi.useRealTimers()
         process.env.IGDB_TOKEN = 'initial-token'
         process.env.IGDB_CLIENT_ID = 'client-id'
         process.env.IGDB_CLIENT_SECRET = 'client-secret'
@@ -176,6 +177,52 @@ describe('gameServer', () => {
 
         const insertValues = sqlSpy.mock.calls[0].slice(1)
 
+        expect(insertValues).toContainEqual([])
+        expect(result.time_to_beat).toEqual([])
+    })
+
+    it('falls back to empty HLTB timings when the scrape times out', async () => {
+        vi.useFakeTimers()
+        searchSpy.mockImplementation(() => new Promise(() => {}))
+
+        sqlSpy
+            .mockResolvedValueOnce({rows: []})
+            .mockResolvedValueOnce({
+                rows: [
+                    {
+                        ID: 4,
+                        TITLE: 'Metaphor: ReFantazio',
+                        USER: 'ciro',
+                        TIME_TO_BEAT: [],
+                        RATING: 9100,
+                        GENRES: ['RPG'],
+                        PLATFORMS: ['PC'],
+                    },
+                ],
+            })
+
+        const {addGame} = await loadModule()
+        const resultPromise = addGame({
+            title: 'Metaphor: ReFantazio',
+            igdb_id: 88,
+            cover_url: '',
+            score: null,
+            rating: 91,
+            summary: 'RPG',
+            comments: '',
+            genres: ['RPG'],
+            platforms: ['PC'],
+            release_date: '2024-10-11',
+            start_date: null,
+            finish_date: null,
+            status: 'PLAN',
+            user: 'ciro',
+        })
+
+        await vi.advanceTimersByTimeAsync(4000)
+        const result = await resultPromise
+
+        const insertValues = sqlSpy.mock.calls[0].slice(1)
         expect(insertValues).toContainEqual([])
         expect(result.time_to_beat).toEqual([])
     })

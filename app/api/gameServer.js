@@ -7,6 +7,7 @@ import {mapValuesForDB} from "@/app/utils/utils";
 const base_url = 'https://api.igdb.com/v4'
 const auth_url = 'https://id.twitch.tv/oauth2/token?'
 const baseGameCategories = new Set([0, 8, 9, 10, 11])
+const HLTB_TIMEOUT_MS = 4000
 
 let access_token = process.env.IGDB_TOKEN
 let headers = {
@@ -82,6 +83,15 @@ const prioritizeSearchResults = (results, query) => {
 
         return (left?.id ?? 0) - (right?.id ?? 0)
     })
+}
+
+const withTimeout = (promise, timeoutMs, errorMessage) => {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => {
+            setTimeout(() => reject(new Error(errorMessage)), timeoutMs)
+        }),
+    ])
 }
 
 const formatDbData = (json) => {
@@ -174,16 +184,27 @@ export async function getGames(user) {
 }
 
 export async function addGame(game) {
-    return hltbService.search(game.title)
-        .then(htlbEntry => {
-            console.log(htlbEntry)
-            game.time_to_beat = [htlbEntry[0].gameplayMain, htlbEntry[0].gameplayMainExtra, htlbEntry[0].gameplayCompletionist].map(t => Math.round(t * 100))
-            return insertGame(game)
-        }).catch(async (e) => {
-            console.log(e)
+    try {
+        const hltbEntry = await withTimeout(
+            hltbService.search(game.title),
+            HLTB_TIMEOUT_MS,
+            'HLTB search timed out'
+        )
+
+        if (Array.isArray(hltbEntry) && hltbEntry.length > 0) {
+            game.time_to_beat = [
+                hltbEntry[0].gameplayMain,
+                hltbEntry[0].gameplayMainExtra,
+                hltbEntry[0].gameplayCompletionist,
+            ].map((time) => Math.round(time * 100))
+        } else {
             game.time_to_beat = []
-            return insertGame(game)
-        })
+        }
+    } catch (_error) {
+        game.time_to_beat = []
+    }
+
+    return insertGame(game)
 }
 
 export async function updateGame(game) {

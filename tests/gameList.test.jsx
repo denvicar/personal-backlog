@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event'
 import {describe, expect, it, vi} from 'vitest'
 
 import GameList from '@/app/components/gameList'
+import {addGame, searchGame} from '@/app/api/gameServer'
 import {status} from '@/app/utils/constants'
 
 vi.mock('next/image', () => ({
@@ -23,11 +24,17 @@ vi.mock('@/app/api/gameServer', () => ({
 }))
 
 vi.mock('@/app/components/gameSearch', () => ({
-    default: function MockGameSearch({filter, setFilter}) {
+    default: function MockGameSearch({filter, setFilter, search, handleAdd, searchResult}) {
         return (
             <aside>
                 <label htmlFor={"filter-input"}>Filter your backlog</label>
                 <input id={"filter-input"} value={filter} onChange={(event) => setFilter(event.target.value)} />
+                <button onClick={() => search('Balatro')}>Search game</button>
+                {searchResult.map((result) => (
+                    <button key={result.id} onClick={() => handleAdd(result.id, {status: 'PLAN', start_date: '', finish_date: '', score: null, comments: ''})}>
+                        Add {result.name}
+                    </button>
+                ))}
             </aside>
         )
     }
@@ -82,5 +89,18 @@ describe('GameList sorting', () => {
 
         await user.click(screen.getByRole('button', {name: 'Toggle mobile sort direction'}))
         expect(getRenderedTitles()).toEqual(['Animal Well', 'Zelda', 'Balatro'])
+    })
+
+    it('does not append a failed add response to the backlog', async () => {
+        const user = userEvent.setup()
+        searchGame.mockResolvedValue([{id: 9, name: 'Balatro', genres: [], platforms: []}])
+        addGame.mockResolvedValue({status: 500, message: 'Database error'})
+
+        render(<GameList games={games} user={{name: 'ciro'}} />)
+
+        await user.click(screen.getByRole('button', {name: 'Search game'}))
+        await user.click(screen.getByRole('button', {name: 'Add Balatro'}))
+
+        expect(screen.getAllByRole('heading', {level: 3})).toHaveLength(3)
     })
 })
